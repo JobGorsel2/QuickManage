@@ -1,0 +1,94 @@
+body {
+  background-color: rgb(243, 243, 243);
+}
+
+.login-wrapper {
+  background-color: rgb(34, 34, 34);
+  position: relative;
+  height: 100vh;
+}
+.login-wrapper .login-container {
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+}
+.login-wrapper .login-container img {
+  position: relative;
+  height: 250px;
+  width: 250px;
+  float: left;
+  margin-bottom: 40px;
+  border-radius: 20px;
+}
+.login-wrapper .login-container .input-form-wr {
+  width: 100%;
+  padding: 20px;
+}
+.login-wrapper .login-container .input-form-wr input {
+  width: 300px;
+  border-radius: 3px;
+  outline: none;
+  border: none;
+  padding: 6px;
+  margin-bottom: 27px;
+}
+.login-wrapper .login-container .input-form-wr button {
+  background-color: rgb(245, 176, 86);
+  padding: 8px 40px;
+  float: right;
+  border: none;
+}
+
+.menu .menu-wrapper {
+  height: 100vh;
+  width: 250px;
+  position: fixed;
+  background-color: rgb(39, 39, 39);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 0px 8px 5px #ddd;
+}
+.menu .menu-wrapper ul {
+  width: 100%;
+  padding: 20px;
+  margin: 0;
+}
+.menu .menu-wrapper ul li {
+  list-style-type: none;
+  margin-bottom: 35px !important;
+}
+.menu .menu-wrapper ul li a {
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 3px;
+  padding: 10px;
+  width: 100%;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  color: rgb(199, 199, 199);
+  background-color: rgb(53, 53, 53);
+  transition: 0.5s;
+}
+.menu .menu-wrapper ul li a:hover {
+  background-color: rgb(194, 137, 14);
+  color: #fff;
+}
+.menu .menu-wrapper a.log-out-btn {
+  position: absolute;
+  width: 100%;
+  margin-left: -20px;
+  text-align: center;
+  bottom: 20px;
+  color: rgb(194, 137, 14);
+  transition: 0.5s;
+  font-size: 18px;
+  text-decoration: none;
+}
+.menu .menu-wrapper a.log-out-btn:hover {
+  color: #fff;
+}/*# sourceMappingURL=style.css.map */
