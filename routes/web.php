@@ -20,3 +20,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/posts', [App\Http\Controllers\PostController::class, 'index'])->name('posts');
+
+Route::get('/pages', [App\Http\Controllers\PageController::class, 'index'])->name('pages');

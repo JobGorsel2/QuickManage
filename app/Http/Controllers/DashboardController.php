@@ -23,6 +23,9 @@ class DashboardController extends Controller
      */
     public function index()
     {
+
+        dd($_SERVER);
+
         return view('dashboard');
     }
 }

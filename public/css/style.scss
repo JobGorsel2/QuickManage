@@ -90,14 +90,19 @@ body {
             width: 100%;
             margin-left:-20px;
             text-align: center;
-            bottom:20px;
+            bottom:0px;
             color:rgb(194, 137, 14);
             transition: 0.5s;
             font-size: 18px;
             text-decoration: none;
             &:hover {
                 color:#fff;
+                background-color: rgb(58, 58, 58);
+                padding:5px 0px;
             }
         }
     }
 }
+
+// dashboard 
+

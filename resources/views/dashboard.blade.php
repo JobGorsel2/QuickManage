@@ -1,22 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="menu">
-        <div class="menu-wrapper">
-            <ul>
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Posts</a></li>
-                <li><a href="#">Pages</a></li>
-                <li><a href="#">Media</a></li>
-                <li><a href="#">Settings</a></li>
-                <a class="log-out-btn" href="#" onclick="event.preventDefault();document.getElementById('logout-form').submit();"> Logout </a>
+   @include('includes.menu')
 
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        {{ csrf_field() }}
-                </form>
-            </ul>
+   <div class="container">
+        <div class="row">
+            <div class="offset-lg-2 co-lg-10">
+                <div class="dashboard_wrapper pt-5">
+                    <h2> HTML Page Creator for ArcGIS Online</h2>
+                </div>
+            </div>
         </div>
-    </div>
+   </div>
+
 @endsection
 
 
