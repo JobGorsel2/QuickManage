@@ -48,7 +48,7 @@
                             </a>
                     
                         @endif  
-                           <br/> <a href="/testAI" class="ai-btn">Test AI met AGOL</a>
+                           <br/> <a href="/testAI" class="ai-btn">Test AI met AGOL</a> 
                     </div>
                
                 </div>    
