@@ -1,0 +1,25 @@
+body {
+  background-color: #2C2C2C !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+}
+body .error-wrapper {
+  padding: 100px;
+  background-color: rgba(75, 75, 75, 0.719);
+  text-align: center;
+  border-radius: 15px;
+}
+body .error-wrapper .logo img {
+  height: 200px;
+}
+body .error-wrapper .message {
+  font-size: 42px;
+  color: #e9e9e9;
+}
+body .error-wrapper .code {
+  font-size: 140px;
+  color: #e9e9e9;
+}/*# sourceMappingURL=errors-style.css.map */

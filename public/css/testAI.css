@@ -1,0 +1,93 @@
+body {
+  background-color: #2c2c2c;
+}
+
+.tableContainer {
+  position: absolute;
+  bottom: 0px;
+}
+
+#tableDiv {
+  height: 70vh;
+  width: 100%;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px #595959;
+}
+
+.c-white {
+  color: #fff;
+}
+
+.title_container {
+  padding: 20px;
+}
+.title_container .logoutBTN {
+  float: right;
+}
+
+.AIChatbox {
+  background-color: #292929;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px #595959;
+}
+.AIChatbox .aiLoadingText {
+  position: absolute;
+  top: 80px;
+  margin-top: 0px;
+  background: linear-gradient(90deg, #313131, #141414, #858585);
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: textFlow 2.5s linear infinite;
+}
+@keyframes textFlow {
+  from {
+    background-position: 200% center;
+  }
+  to {
+    background-position: 0% center;
+  }
+}
+.AIChatbox #aiLoader {
+  align-items: center;
+}
+.AIChatbox .explenationAI {
+  color: #fff;
+  height: 90%;
+}
+.AIChatbox .explenationAI select {
+  color: #fff;
+  padding: 10px;
+  background-color: #3a3a3a;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+}
+.AIChatbox .explenationAI select option {
+  background-color: #3a3a3a;
+}
+.AIChatbox .input_chatbox {
+  display: none;
+  width: 100%;
+}
+.AIChatbox .input_chatbox input {
+  width: 100% !important;
+  background-color: #3a3a3a;
+  border: none;
+  padding: 10px 30px;
+  border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
+  outline: none;
+  color: #fff;
+}
+.AIChatbox .input_chatbox button {
+  background-color: #3a3a3a !important;
+  color: #fff !important;
+  outline: none;
+  border: none;
+  border-bottom-right-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 10px 30px;
+}
