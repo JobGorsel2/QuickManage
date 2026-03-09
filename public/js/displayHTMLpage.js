@@ -1,3 +1,4 @@
+ 
 const data = window.templateChoice;
     // const DBparameters = window.DBparameters;
      
@@ -28,116 +29,86 @@ const data = window.templateChoice;
                         
                 const workspaceData = await response.json();
                 console.log( 'Full response of the request: ');
-                console.log( workspaceData);
                 
                 const parameters = workspaceData.parameters;
                 const container = document.getElementById('GKB_Form_Template');
                 // foreach alle parameters 
+
+                console.log( parameters);
+
                 parameters.forEach(param => {
 
-                    if (param.optional === true) {
-                        req ='';
-                    } else if (param.optional === false) {
-                        req ='*';  
-                    }
+                    const isNOTRequired =
+                    param.required === false ||
+                    param.required === 0 ||
+                    param.required === "false" ||
+                    param.required === "0";
+
+                    // show * for required fields (your current logic is reversed)
+                    const reqMark = isNOTRequired ? " " : "*";
 
                     const label = document.createElement('label');
-                    label.textContent = param.description + req || param.name +req;
+                    label.textContent = (param.prompt || param.name) + reqMark;
                     label.setAttribute('for', param.name);
 
-                    let input;
-                    let selectFileText;
+                    let input = null;
+                    let selectFileText = null;
                     // console.log(param)
                     // check if parameter type is string
-                    if (param.type === 'STRING') { 
+                    if (param.type === 'text') { 
                         // console.log(param.name)
                         // als parameter required is ( dus hij is niet optioneel )
-                        if(param.optional == false) {
-
-                            input = document.createElement('input');
-                            input.type = 'text';
-                            input.name = param.name;
-                            input.id = param.name;
-                            input.value = param.defaultValue || '';
-                            input.className = 'input-form';
-                            input.setAttribute("data-required","true");
-                        // als parameter required is ( dus hij is optioneel )
-                        } else if (param.optional == true) {
-
-                            input = document.createElement('input');
-                            input.type = 'text';
-                            input.name = param.name;
-                            input.id = param.name;
-                            input.value = param.defaultValue || '';
-                            input.className = 'input-form';
-
+                        if (param.type === 'text') {
+                        input = document.createElement('input');
+                        input.type = 'text';
+                        input.name = param.name;
+                        input.id = param.name;
+                        input.value = param.defaultValue || '';
+                        input.className = 'input-form';
+                        if (!isNOTRequired) input.dataset.required = "true";
                         }
 
                         // check if parameter type is file
-                    } else if (param.type === 'FILE_OR_URL' || param.type === 'list') {
-                        // als parameter required is ( dus hij is niet optioneel )
-                        if(param.optional == false) {
+                    } else if (param.type === 'file' || param.type === 'list') {
+                        selectFileText = document.createElement('label');
+                        selectFileText.id = 'data_label';
+                        selectFileText.textContent = 'Selecteer hier uw bestand';
+                        selectFileText.className = 'btn btn-upload mb-3 file-btn text-center';
 
-                            selectFileText = document.createElement('label');
-                            selectFileText.id = 'data_label';
-                            selectFileText.textContent = 'Selecteer hier uw bestand';
-                            selectFileText.setAttribute('for', param.name+'_req');
-                            selectFileText.className = 'btn btn-upload mb-3 file-btn text-center';
-                            
-                            input = document.createElement('input');
-                            input.type = 'file';
-                            input.name = param.name;
-                            input.id = param.name+'_req';
-                            input.className = 'position-absolute invisible';
-                            input.setAttribute("data-required","true");
+                        input = document.createElement('input');
+                        input.type = 'file';
+                        input.name = param.name;
+                        input.id = `${param.name}_req`;           // keep one convention
+                        input.className = 'position-absolute invisible';
 
-                            input.addEventListener('change', (e) => {
+                        selectFileText.setAttribute('for', input.id);
+                        if (!isNOTRequired) input.dataset.required = "true";
+
+                        input.addEventListener('change', (e) => {
                             const file = e.target.files[0];
                             selectFileText.textContent = file ? file.name : 'Selecteer hier uw bestand';
-                            });
-                        // als parameter niet required is ( dus hij is optioneel)
-                        } else if (param.optional == true) {
-
-                            selectFileText = document.createElement('label');
-                            selectFileText.id = 'data_label';
-                            selectFileText.textContent = 'Selecteer hier uw bestand';
-                            selectFileText.setAttribute('for', param.name);
-                            selectFileText.className = 'btn btn-upload mb-3 file-btn text-center';
-                            
-                            input = document.createElement('input');
-                            input.type = 'file';
-                            input.name = param.name;
-                            input.id = param.name+'_req';
-                            input.className = 'position-absolute invisible';
-
-                            input.addEventListener('change', (e) => {
-                            const file = e.target.files[0];
-                            selectFileText.textContent = file ? file.name : 'Selecteer hier uw bestand';
-                            });
-
-                        }
-                    
+                        });
+                        } 
+                    else if (param.type === 'checkbox') {
+                        input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.name = param.name;
+                        input.id = param.name;
+                        input.className = 'input-form-checkbox';
                         
-                    } else if (param.type === 'CHECKBOX') { 
-                        if(param.optional == false){
-                            input = document.createElement('input');
-                            input.type = 'checkbox';
-                            input.name = param.name;
-                            input.id = param.name;
-                            input.value = param.defaultValue || '';
-                            input.className = 'input-form-checkbox';
-                            input.setAttribute("data-required","true");
-                        }
-                            
-                        else if(param.optional == true){
-                            input = document.createElement('input');
-                            input.type = 'checkbox';
-                            input.name = param.name;
-                            input.id = param.name;
-                            input.className = 'input-form-checkbox';
-                            input.setAttribute("data-required","true");
-                        }
-                    } 
+                        if (!isNOTRequired) input.dataset.required = "true";
+                    }
+
+                    else if (param.type === 'datetime') {
+                        input = document.createElement('input');
+                        input.type = 'datetime-local';
+                        input.name = param.name;
+                        input.id = param.name;
+                        input.className = 'input-form-datetime';
+                        input.value = param.defaultValue;
+                        if (!isNOTRequired) input.dataset.required = "true";
+                    }
+
                     
                     else {
                         input = document.createElement('input');
@@ -156,7 +127,12 @@ const data = window.templateChoice;
                     } else {
                         inputWrap.appendChild(label);
                     } 
-                    
+
+                    if (!(input instanceof Node)) {
+                    console.error("Skipping param because input is not a Node:", param, "input:", input);
+                    return;
+                    }
+
                     inputWrap.appendChild(input);
                     inputWrap.appendChild(document.createElement('br'));
 
@@ -178,30 +154,31 @@ const data = window.templateChoice;
 
             const formContainer = document.getElementById('GKB_Form_Template');
             const inputs = formContainer.querySelectorAll('input');
+            console.log(inputs)
             let inputFiles = false;
             let isValid = true;
         
             const formData = new FormData();
  
                 inputs.forEach(input => {
-                    const isRequired = input.hasAttribute('data-required') && input.getAttribute('data-required') === 'true';
-
-                if (isRequired) {
+                    const isNOTRequired = input.hasAttribute('data-required') && input.getAttribute('data-required') === 'true';
+                    // console.log(input)
+                if (isNOTRequired) {
                         if (input.type === 'file') {
+                            const fileLabel = formContainer.querySelector(`label[for="${input.id}"]`);
+                            // console.log(fileLabel)
                             if (input.files.length === 0) {
-                                const label = document.querySelector(`label[for="${input.name}_req"]`);
-                                if (label) label.classList.add('outline_red2');
+                                console.log('add class')
+                                if (fileLabel) fileLabel.classList.add('outline_red2');
                                 isValid = false;
                                 return;
                             } else {
-                                const label = document.querySelector(`label[for="${input.name}_req"]`);
-                                if (label) label.classList.remove('outline_red2');
+                                if (fileLabel) fileLabel.classList.remove('outline_red2');
                             }
-                            if (input.files.length > 0) {
-                            formData.append(input.name, input.files[0]);
+
+                            formData.append("files", input.files[0], input.files[0].name);
+                            inputFiles = true;
                             }
-                             inputFiles = true;
-                        }
 
                         if (input.type === 'text') {
                             if (!input.value.trim()) {
@@ -227,11 +204,30 @@ const data = window.templateChoice;
                             }
                             
                         }
+                            console.log(input.value)
+
+                        if (input.type === 'datetime') {
+                            console.log(input.value)
+                            if (!input.value) {
+                                document.getElementById(input.name).classList.add('outline_red2');
+                                 
+                                  
+                                isValid = false;
+                                return;
+                            }  else {
+                                document.getElementById(input.name).classList.remove('outline_red2'); 
+                                
+                            }
+                            
+                        }
                         
-                } else { }
+                } else { }///
+
                             input.addEventListener('change', function () {
-    console.log(this.value);
-});
+                                console.log(this.value);
+                            });
+
+                            /////
                 });
                  
                 if (!isValid) {
@@ -245,7 +241,7 @@ const data = window.templateChoice;
                       
                         if(inputFiles === true){
                             console.log(inputFiles)
-                            // uploadToServerAndStartWorkspace();
+                            uploadToServerAndStartWorkspace();
                         } else if ( inputFiles === false ) {
 
                             const workspaceParams = [];
@@ -258,7 +254,7 @@ const data = window.templateChoice;
  
                             });
                             
-                            // StartWorkspace(workspaceParams);
+                            StartWorkspace(workspaceParams);
                             
                         }
                         // uploadToServerAndStartWorkspace();
@@ -271,12 +267,15 @@ const data = window.templateChoice;
                 // function uploadToServerAndStartWorkspace()
                 function uploadToServerAndStartWorkspace() {
                     // here make post requests to fme server to upload the file, then after success response run function StartWorkspace that sends an post request to the api to run the workspace. POST with the input values and file names.
-                        // upload files to /FME_SHAREDRESOURCE_TEMP/filesys
-                         fetch('https://fme-gkb.fmecloud.com/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_TEMP/filesys', {
+                        // upload files to /FME_SHAREDRESOURCE_TEMP/upload
+                        // console.log(formData)
+
+
+                         fetch('https://fme-gkb.fmecloud.com/fmeapiv4/resources/connections/FME_SHAREDRESOURCE_TEMP/upload?overwrite=true&path=%2FUploads_QuickManage', {
                                 method: 'POST',
                                 headers: {
                                     "Authorization": "fmetoken token=653d48815e91626f06f6ed871b3810605193ac02",
-                                    "Accept":"application/json",
+                                    "Accept":"*/*",
                                 },
                                 processData: false,
                                 contentType: false,
@@ -296,7 +295,7 @@ const data = window.templateChoice;
                                     if (input.type === 'file' && input.files.length > 0) {
                                         workspaceParams.push({
                                             name: input.name,
-                                            value: ["$(FME_SHAREDRESOURCE_TEMP)/" + input.files[0].name]
+                                            value: "$(FME_SHAREDRESOURCE_TEMP)/Uploads_QuickManage/" + input.files[0].name
                                         });
                                     } else {
                                         workspaceParams.push({
@@ -314,23 +313,39 @@ const data = window.templateChoice;
                             });
                 }
 
-                function StartWorkspace(publishedParameters) {
+                function buildPublishedParametersObject(paramsArray) {
+                const obj = {};
+
+                paramsArray.forEach(p => {
+                    obj[p.name] = p.value;
+                });
+
+                return obj;
+                }
+
+                function StartWorkspace(paramsArray) {
                     // run workspace with the publishedParameters
                     const repo = window.templateChoice.repository;
                     const workspaceName = window.templateChoice.workspace;
 
                     
-                    const jsonArrayDef = JSON.stringify({ publishedParameters });
+                    const publishedParameters = buildPublishedParametersObject(paramsArray);
+                    const body = {
+                        repository: repo,
+                        workspace: workspaceName,
+                        publishedParameters: publishedParameters
+                    };
                     // console.log(jsonArray)
 
-                    fetch(`https://fme-gkb.fmecloud.com/fmerest/v3/transformations/transact/${repo}/${workspaceName}`, {
-                        method: 'POST',
+                      fetch(`https://fme-gkb.fmecloud.com/fmeapiv4/jobs`, {
+                        method: "POST",
                         headers: {
-                            "Authorization":"fmetoken token=653d48815e91626f06f6ed871b3810605193ac02", 
-                            "Content-Type":"application/json",
-                            "Accept":"application/json",
+                            Authorization: "fmetoken token=653d48815e91626f06f6ed871b3810605193ac02",
+                            "Content-Type": "application/json",
+                            Accept: "application/json"
                         },
-                        body: jsonArrayDef
+                        body: JSON.stringify(body)
+                    
                     })
                     .then(res => {
                         if (!res.ok) throw new Error(`Workspace start failed: ${res.status}`);
@@ -338,7 +353,7 @@ const data = window.templateChoice;
                     })
                     .then(data => {
                         console.log(data)
-
+ 
                         document.getElementById("mess1").style.display = 'none';
                         document.getElementById("loading").style.display = 'none';
                         document.getElementById("mess2").style.display = 'block';

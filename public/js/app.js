@@ -14756,6 +14756,32 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /***/ },
 
+/***/ "./resources/sass/GKB_Realisatie_Style.scss"
+/*!**************************************************!*\
+  !*** ./resources/sass/GKB_Realisatie_Style.scss ***!
+  \**************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ },
+
+/***/ "./resources/sass/dataviewer.scss"
+/*!****************************************!*\
+  !*** ./resources/sass/dataviewer.scss ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ },
+
 /***/ "./resources/sass/style.scss"
 /*!***********************************!*\
   !*** ./resources/sass/style.scss ***!
@@ -14900,6 +14926,8 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 		var installedChunks = {
 /******/ 			"/js/app": 0,
 /******/ 			"css/style": 0,
+/******/ 			"css/dataviewer": 0,
+/******/ 			"css/GKB_Realisatie_Style": 0,
 /******/ 			"css/testAI": 0
 /******/ 		};
 /******/ 		
@@ -14950,9 +14978,11 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	__webpack_require__.O(undefined, ["css/style","css/testAI"], () => (__webpack_require__("./resources/js/app.js")))
-/******/ 	__webpack_require__.O(undefined, ["css/style","css/testAI"], () => (__webpack_require__("./resources/sass/style.scss")))
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/style","css/testAI"], () => (__webpack_require__("./resources/sass/testAI.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/style","css/dataviewer","css/GKB_Realisatie_Style","css/testAI"], () => (__webpack_require__("./resources/js/app.js")))
+/******/ 	__webpack_require__.O(undefined, ["css/style","css/dataviewer","css/GKB_Realisatie_Style","css/testAI"], () => (__webpack_require__("./resources/sass/style.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/style","css/dataviewer","css/GKB_Realisatie_Style","css/testAI"], () => (__webpack_require__("./resources/sass/testAI.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/style","css/dataviewer","css/GKB_Realisatie_Style","css/testAI"], () => (__webpack_require__("./resources/sass/GKB_Realisatie_Style.scss")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/style","css/dataviewer","css/GKB_Realisatie_Style","css/testAI"], () => (__webpack_require__("./resources/sass/dataviewer.scss")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

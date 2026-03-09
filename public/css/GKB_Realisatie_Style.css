@@ -89,6 +89,14 @@ input[type=file].input-form {
   margin: 20px 10px;
 }
 
+.input-form-datetime {
+  height: 30px;
+  width: 120px;
+  accent-color: #3e7a1b;
+  float: inline-start;
+  margin: 20px 10px;
+}
+
 .c_red {
   color: #ac0000;
   font-weight: 600 !important;
