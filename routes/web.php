@@ -79,3 +79,8 @@ Route::post('/ai/nl2where', [App\Http\Controllers\AIController::class, 'nl2where
     ->name('ai.nl2where');
 
 Route::get('/ai/nl2where-stream', [App\Http\Controllers\AIController::class, 'nl2whereStream']);
+
+
+
+
+Route::get('/quickdataviewer', [App\Http\Controllers\QuickDataViewerController::class, 'index']);
