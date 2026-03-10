@@ -138,22 +138,51 @@
       <div class="row">
         <div class="col-lg-12 text-center">
           <div class="menu_dataviewer">
-            <button id="back-button" class="btn upload" data-action="back">Terug naar upload</button>
-            <button id="zoom-button" class="btn zoomTodata" data-action="zoom">Zoom naar data</button>
-            <button id="export-button" class="btn export" data-action="export">Exporteer naar Excel</button>
             
+
+            <div id="back-drop-zone" class="back-drop-zone" role="button" tabindex="0" aria-label="Sleep bestand hier of klik om te selecteren">
+
+              <button id="back-button"   style="width: 100%; pointer-events: none; border: none; background: none; color: inherit;"></button>
+
+              <input type="file" id="back-file-input" accept=".zip" hidden />
+              
+              <!-- Upload prompt (shown when no file loaded) -->
+              <div id="back-zone-upload-prompt" class="back-zone-content">
+                <p class="drop-label">
+                  <strong>Kies een bestand</strong> of sleep het hierin.
+                </p>
+                <p class="drop-hint">Ondersteund: Shapefile (.zip)</p>
+              </div>
+
+              <!-- Loaded file display (hidden by default) -->
+              <div id="back-zone-file-display" class="back-zone-content" style="display: none;">
+                <p class="loaded-file-label">📁 Geladen bestand:</p>
+                <p id="back-zone-file-name" class="loaded-file-name"></p>
+                <p class="back-zone-reload-hint">Klik of sleep voor nieuw bestand</p>
+              </div>
+
+            </div>
             <div id="layerNames" style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 5px; display: none;"></div>
-           <button id="clear-button" class="btn removeData" data-action="clear"><i class="fa-solid fa-trash"></i></button>
+
+            
+
           </div>
         </div>
       </div>
+   
+        <div class="action_buttons">
+          <button id="zoom-button" class="btn zoomTodata" data-action="zoom">Zoom naar data</button>
+          <button id="export-button" class="btn export" data-action="export"><i class="fa-solid fa-arrow-right"></i> Excel</button>
+          <button id="clear-button" class="btn removeData" data-action="clear"><i class="fa-solid fa-trash"></i></button>
+        </div>
+
     </div>
     <div class="footer_dataviewer">
       <div class="row">
         <div class="col-lg-12 text-center">
           <div class="footer-img">
             <img src="{{ asset('storage/footer.png') }}" class="logo" />
-              <span>Mocht u problemen ondervinden, neem dan contact op met de beheerder.</span>
+              
           </div>
         </div>
       </div>

@@ -12,7 +12,7 @@ class QuickDataViewerController extends Controller
  public function index()
     { 
         
-        return view('quickdatamanage.index',[
+        return view('quickdataviewer.index',[
        
             
         ]);

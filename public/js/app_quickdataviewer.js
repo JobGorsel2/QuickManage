@@ -1,685 +1,502 @@
 // ===========================
-// 0) Register projections
+// 0) Register projections & Setup
 // ===========================
-proj4.defs(
-  "EPSG:28992",
-  "+proj=sterea +lat_0=52.1561605555556 +lon_0=5.38763888888889 +k=0.9999079 " +
-    "+x_0=155000 +y_0=463000 +ellps=bessel " +
-    "+towgs84=565.4171,50.3319,465.5524,1.9342,-1.6677,9.1019,4.0725 " +
-    "+units=m +no_defs"
-);
+// Register EPSG:28992 (RD - Dutch coordinate system) projection using Proj4.js
+proj4.defs("EPSG:28992", "+proj=sterea +lat_0=52.1561605555556 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,1.9342,-1.6677,9.1019,4.0725 +units=m +no_defs");
 ol.proj.proj4.register(proj4);
 
-// Recommended extent for RD (NL bounds)
+// Set map extent boundaries (Netherlands RD bounds in meters)
 const RD_EXTENT = [-285401.92, 22598.08, 595401.92, 903401.92];
-const rdProj = ol.proj.get("EPSG:28992");
-rdProj.setExtent(RD_EXTENT);
+ol.proj.get("EPSG:28992").setExtent(RD_EXTENT);
 
 // ===========================
-// 1) DOM refs
+// DOM references to all UI elements
 // ===========================
-const dropZone = document.getElementById("drop-zone");
-const fileInput = document.getElementById("file-input");
-const errorBox = document.getElementById("error-box");
-const errorMsg = document.getElementById("error-msg");
-const loadingOverlay = document.getElementById("loading-overlay");
-const loadingMsg = document.getElementById("loading-msg");
-
-const screen1 = document.querySelector(".fileSelectionViewer");
-const screen2 = document.querySelector(".quickDataViewer");
-
-// ===========================
-// 2) UI helpers
-// ===========================
-function showError(msg) {
-  errorMsg.textContent = msg;
-  errorBox.classList.remove("hidden");
-}
-function clearError() {
-  errorMsg.textContent = "";
-  errorBox.classList.add("hidden");
-}
-function setLoading(on, msg = "Bestand verwerken…") {
-  loadingMsg.textContent = msg;
-  loadingOverlay.classList.toggle("hidden", !on);
-}
-function switchToMapScreen() {
-  screen1.style.display = "none";
-  screen2.style.display = "block";
-}
+const dropZone = document.getElementById("drop-zone"); // Drop zone for initial file upload
+const fileInput = document.getElementById("file-input"); // Hidden file input for main upload
+const errorBox = document.getElementById("error-box"); // Error message container
+const errorMsg = document.getElementById("error-msg"); // Error message text element
+const loadingOverlay = document.getElementById("loading-overlay"); // Loading spinner container
+const loadingMsg = document.getElementById("loading-msg"); // Loading message text
+const screen1 = document.querySelector(".fileSelectionViewer"); // Upload screen (initial view)
+const screen2 = document.querySelector(".quickDataViewer"); // Map viewer screen
 
 // ===========================
-// 3) PDOK WMTS basemap (EPSG:28992)
+// UI helper functions for user feedback
 // ===========================
-// Note: for PDOK WMTS, style is usually "default". Your previous style string may break.
-// If you KNOW your style is correct, you can keep it; this is the safe default:
+// Display error message to user
+const showError = (msg) => { errorMsg.textContent = msg; errorBox.classList.remove("hidden"); };
+// Hide error message
+const clearError = () => { errorMsg.textContent = ""; errorBox.classList.add("hidden"); };
+// Show/hide loading overlay with optional message
+const setLoading = (on, msg = "Bestand verwerken…") => { loadingMsg.textContent = msg; loadingOverlay.classList.toggle("hidden", !on); };
+// Switch from upload screen to map viewer screen with delayed back-zone initialization
+const switchToMapScreen = () => { screen1.style.display = "none"; screen2.style.display = "block"; setTimeout(() => initializeBackDropZone(), 100); };
+
+// ===========================
+// Basemap configuration - PDOK (Dutch government map service)
+// ===========================
+// WMTS (Web Map Tile Service) source for background map tiles in RD projection
 const pdokWmtsSource = new ol.source.WMTS({
-  url: "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0",
-  layer: "standaard", // options often include: standaard, grijs, pastel, water (depends on service)
-  matrixSet: "EPSG:28992",
-  format: "image/png",
-  style: "default",
-  projection: "EPSG:28992",
+  url: "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0", // PDOK service endpoint
+  layer: "standaard", // Standard map variant (options: grijs, pastel, water)
+  matrixSet: "EPSG:28992", // Use RD projection for tiles
+  format: "image/png", // PNG format for tile images
+  style: "default", // Default map styling
+  projection: "EPSG:28992", // RD projection
   tileGrid: new ol.tilegrid.WMTS({
-    origin: [-285401.92, 903401.92], // top-left of RD extent
-    resolutions: [
-      3440.64, 1720.32, 860.16, 430.08, 215.04,
-      107.52, 53.76, 26.88, 13.44, 6.72,
-      3.36, 1.68, 0.84, 0.42, 0.21
-    ],
-    matrixIds: ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14"]
+    origin: [-285401.92, 903401.92], // Top-left of RD extent
+    // Resolution levels from largest (3440.64m) to smallest (0.21m)
+    resolutions: [3440.64, 1720.32, 860.16, 430.08, 215.04, 107.52, 53.76, 26.88, 13.44, 6.72, 3.36, 1.68, 0.84, 0.42, 0.21],
+    matrixIds: ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14"] // WMTS zoom level IDs
   }),
-  wrapX: false
+  wrapX: false // Don't wrap tiles horizontally (RD projection)
 });
 
-const baseLayer = new ol.layer.Tile({ source: pdokWmtsSource });
+// ===========================
+// Vector feature styling - appearance of shapefile features on map
+// ===========================
+// Returns orange style for visible features, null for hidden ones (not rendered)
+const getFeatureStyle = (feature) => feature.get('_visible') !== false ? new ol.style.Style({
+  fill: new ol.style.Fill({ color: "rgba(231, 151, 3, 0.58)" }), // Orange fill for polygons
+  stroke: new ol.style.Stroke({ color: "rgb(173, 81, 1)", width: 2 }), // Dark orange border
+  image: new ol.style.Circle({ radius: 6, fill: new ol.style.Fill({ color: "rgba(255, 165, 0, 0.75)" }), stroke: new ol.style.Stroke({ color: "rgba(255, 120, 0, 1)", width: 2 }) })
+}) : null; // Return null to hide feature on map
 
 // ===========================
-// 4) Vector styling (orange fill, with layer visibility)
+// Vector layer setup for displaying shapefile features
 // ===========================
-function getFeatureStyle(feature, resolution) {
-  const isVisible = feature.get('_visible') !== false; // Default to visible
-  
-  if (!isVisible) {
-    return null; // Don't render invisible features
-  }
-  
-  return new ol.style.Style({
-    fill: new ol.style.Fill({
-      color: "rgba(231, 151, 3, 0.58)" // orange fill
-    }),
-    stroke: new ol.style.Stroke({
-      color: "rgb(173, 81, 1)",
-      width: 2
-    }),
-    image: new ol.style.Circle({
-      radius: 6,
-      fill: new ol.style.Fill({ color: "rgba(255, 165, 0, 0.75)" }),
-      stroke: new ol.style.Stroke({ color: "rgba(255, 120, 0, 1)", width: 2 })
-    })
-  });
-}
-
+const vectorSource = new ol.source.Vector(); // Data source for vector features
+// Vector layer that renders features from source with dynamic styling
+const vectorLayer = new ol.layer.Vector({ source: vectorSource, style: getFeatureStyle });
 // ===========================
-// 5) Map init (in RD / EPSG:28992)
+// Initialize OpenLayers map with basemap and vector layer
 // ===========================
-const vectorSource = new ol.source.Vector();
-
-const vectorLayer = new ol.layer.Vector({
-  source: vectorSource,
-  style: getFeatureStyle
-});
-
 const map = new ol.Map({
-  target: "map",
-  layers: [baseLayer, vectorLayer],
-  
-  view: new ol.View({
-    projection: "EPSG:28992",
-    center: [170000, 463000],
-    zoom: 14,
-    extent: RD_EXTENT
-  })
-
-  
+  target: "map", // Attach to #map HTML element
+  layers: [new ol.layer.Tile({ source: pdokWmtsSource }), vectorLayer], // Basemap + vector layer
+  // View configuration with RD projection and Netherlands center point
+  view: new ol.View({ projection: "EPSG:28992", center: [170000, 463000], zoom: 14, extent: RD_EXTENT })
 });
 
- // ===========================
-// Control pane (Upload / Basemap / Zoom / Clear)
 // ===========================
-
-// Keep last known extent of uploaded data for "Zoom to layer"
+// Application state management
+// ===========================
+// Store last known extent of loaded data for zoom-to-data functionality
 let lastDataExtent = null;
+// Track visibility state for each layer by name (layer name -> boolean)
+const layerVisibility = {};
+// Update stored extent when features are added to the map
+const updateLastExtent = () => { const e = vectorSource.getExtent(); lastDataExtent = (e && isFinite(e[0]) && isFinite(e[2])) ? e.slice() : null; };
+vectorSource.on("addfeature", updateLastExtent); // Update extent on feature add
+vectorSource.on("clear", () => (lastDataExtent = null)); // Clear extent when map is cleared
 
-function updateLastExtent() {
-  const extent = vectorSource.getExtent();
-  if (extent && isFinite(extent[0]) && isFinite(extent[2])) {
-    lastDataExtent = extent.slice();
-  } else {
-    lastDataExtent = null;
-  }
-}
-
-// Wrap your zoomToData to also save last extent
-const _zoomToData = zoomToData;
-zoomToData = function () {
-  _zoomToData();
-  updateLastExtent();
-};
-
-// Also update extent after any new features are added
-vectorSource.on("addfeature", updateLastExtent);
-vectorSource.on("clear", () => (lastDataExtent = null));
-
-function setBasemapVariant(variant) {
-  // PDOK BRT WMTS layer names commonly include: standaard, grijs, pastel
-  // If your service uses different names, adjust here.
-  pdokWmtsSource.setLayer(variant);
-  // Refresh tiles
-  pdokWmtsSource.refresh();
-}
-
-function createControlPane() {
-  const container = document.getElementById("controlpanel_dataviewer");
-   
+// ===========================
+// Control panel setup - buttons for map interactions
+// ===========================
+// Creates the control panel with event listeners for zoom, clear, and export
+const createControlPane = () => {
+  const container = document.getElementById("controlpanel_dataviewer"); // Get control panel element
+  let basemap = "standaard"; // Track current basemap variant
   
-  // const badge = container.querySelector("#qdv-basemap-badge");
-
-  // Initial state
-  let basemap = "standaard";
-
+  // Event delegation: handle all button clicks on control panel
   container.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-action]");
+    const btn = e.target.closest("button[data-action]"); // Find clicked button
     if (!btn) return;
-
+    
     const action = btn.getAttribute("data-action");
-
-    if (action === "upload") {
-      // open your existing hidden file input
-      fileInput.click();
-    }
-    if (action === 'back') {
-      // Switch back to upload screen
-      screen1.style.display = 'block';
-      screen2.style.display = 'none';
-      document.getElementById('layerNames').style.display = 'none';
-    }
-    if (action === "basemap-toggle") {
-      basemap = basemap === "standaard" ? "grijs" : "standaard";
-      setBasemapVariant(basemap);
-      badge.textContent = basemap;
-    }
-
     if (action === "zoom") {
-      // Prefer last extent if available
       if (lastDataExtent) {
-        map.getView().fit(lastDataExtent, {
-          padding: [40, 40, 40, 40],
-          duration: 250,
-          maxZoom: 14
-        });
+        map.getView().fit(lastDataExtent, { padding: [40, 40, 40, 40], duration: 250, maxZoom: 14 });
       } else {
         showError("Geen layer geladen om naar te zoomen.");
       }
-    }
-
-    if (action === "clear") {
-      vectorSource.clear(true);
-      closePopup?.(); // if you use popup from earlier
-      lastDataExtent = null;
-      // Reset layer visibility state
+    } else if (action === "clear") {
+      vectorSource.clear(true); // Remove all features from map
+      closePopup?.(); // Close any open attribute popup
+      lastDataExtent = null; // Reset stored extent
+      // Reset all layer visibility states when clearing the map
       Object.keys(layerVisibility).forEach(key => delete layerVisibility[key]);
-      document.getElementById("layerNames").style.display = "none";
-    }
-
-    if (action === "export") {
+      document.getElementById("layerNames").style.display = "none"; // Hide layer panel
+      // Reset back drop zone to upload prompt
+      resetBackDropZoneDisplay();
+    } else if (action === "export") {
       exportToExcel();
     }
   });
 
   return new ol.control.Control({ element: container });
-}
+};
 
-map.addControl(createControlPane());
-
-function clearMap() {
-  vectorSource.clear(true);
-}
-
-// When loading data this is the zoom function:
-function zoomToData() {
-  const extent = vectorSource.getExtent();
-  if (extent && isFinite(extent[0]) && isFinite(extent[1]) && isFinite(extent[2]) && isFinite(extent[3])) {
-    map.getView().fit(extent, {
-      padding: [40, 40, 40, 40],
-      duration: 250,
-      maxZoom: 10
-    });
-  }
-}
+map.addControl(createControlPane()); // Add control panel to map
 
 // ===========================
-// 6) Popup overlay (attributes on click)
+// Feature popup overlay showing attributes on click
 // ===========================
-const popupEl = document.createElement("div");
-popupEl.style.position = "absolute";
-popupEl.style.minWidth = "240px";
-popupEl.style.maxWidth = "420px";
-popupEl.style.background = "white";
-popupEl.style.border = "1px solid rgba(0,0,0,0.25)";
-popupEl.style.borderRadius = "10px";
-popupEl.style.boxShadow = "0 6px 18px rgba(0,0,0,0.18)";
-popupEl.style.padding = "10px 12px";
-popupEl.style.fontSize = "13px";
-popupEl.style.lineHeight = "1.35";
-popupEl.style.pointerEvents = "auto";
+// Creates interactive popup displayed when clicking on features
+const createPopup = () => {
+  const popupEl = document.createElement("div");
+  Object.assign(popupEl.style, { position: "absolute", minWidth: "400px", maxWidth: "450px", background: "white", border: "1px solid rgba(0,0,0,0.25)", borderRadius: "10px", boxShadow: "0 6px 18px rgba(0,0,0,0.18)", padding: "10px 12px", fontSize: "13px", lineHeight: "1.35", pointerEvents: "auto" });
+  
+  const closer = document.createElement("div");
+  closer.textContent = "×";
+  Object.assign(closer.style, { position: "absolute", top: "6px", right: "10px", cursor: "pointer", fontSize: "18px", opacity: "0.6" });
+  closer.onmouseenter = () => (closer.style.opacity = "1");
+  closer.onmouseleave = () => (closer.style.opacity = "0.6");
+  popupEl.appendChild(closer);
 
-const popupCloser = document.createElement("div");
-popupCloser.textContent = "×";
-popupCloser.style.position = "absolute";
-popupCloser.style.top = "6px";
-popupCloser.style.right = "10px";
-popupCloser.style.cursor = "pointer";
-popupCloser.style.fontSize = "18px";
-popupCloser.style.opacity = "0.6";
-popupCloser.onmouseenter = () => (popupCloser.style.opacity = "1");
-popupCloser.onmouseleave = () => (popupCloser.style.opacity = "0.6");
-popupEl.appendChild(popupCloser);
+  const title = document.createElement("div");
+  title.style.cssText = "font-weight: 600; margin-right: 18px;";
+  title.textContent = "Attributes";
+  popupEl.appendChild(title);
 
-const popupTitle = document.createElement("div");
-popupTitle.style.fontWeight = "600";
-popupTitle.style.marginRight = "18px";
-popupTitle.textContent = "Attributes";
-popupEl.appendChild(popupTitle);
+  const content = document.createElement("div");
+  content.style.cssText = "margin-top: 8px; max-height: 400px; overflow: auto;";
+  popupEl.appendChild(content);
 
-const popupContent = document.createElement("div");
-popupContent.style.marginTop = "8px";
-popupContent.style.maxHeight = "240px";
-popupContent.style.overflow = "auto";
-popupEl.appendChild(popupContent);
+  document.body.appendChild(popupEl);
 
-document.body.appendChild(popupEl);
+  const overlay = new ol.Overlay({ element: popupEl, autoPan: true, autoPanAnimation: { duration: 200 }, offset: [0, -10] });
+  map.addOverlay(overlay);
 
-const popupOverlay = new ol.Overlay({
-  element: popupEl,
-  autoPan: true,
-  autoPanAnimation: { duration: 200 },
-  offset: [0, -10]
-});
+  const closePopup = () => overlay.setPosition(undefined);
+  closer.addEventListener("click", closePopup);
 
-map.addOverlay(popupOverlay);
+  map.on("pointermove", (evt) => (map.getTargetElement().style.cursor = map.hasFeatureAtPixel(evt.pixel) ? "pointer" : ""));
+  map.on("singleclick", (evt) => {
+    const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f);
+    if (!feature) { closePopup(); return; }
+    
+    const props = { ...feature.getProperties() };
+    delete props.geometry;
+    const keys = Object.keys(props);
 
-function closePopup() {
-  popupOverlay.setPosition(undefined);
-}
-popupCloser.addEventListener("click", closePopup);
+    title.textContent = keys.length ? "Attributes" : "No attributes";
+    content.innerHTML = "";
 
-// Cursor feedback + close popup on background click
-map.on("pointermove", (evt) => {
-  const hit = map.hasFeatureAtPixel(evt.pixel);
-  map.getTargetElement().style.cursor = hit ? "pointer" : "";
-});
-
-map.on("singleclick", (evt) => {
-  const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f);
-  if (!feature) {
-    closePopup();
-    return;
-  }
-
-  // Build a simple attributes table
-  const props = feature.getProperties();
-  delete props.geometry;
-
-  const keys = Object.keys(props);
-
-  popupTitle.textContent = keys.length ? "Attributes" : "No attributes";
-  popupContent.innerHTML = "";
-
-  if (!keys.length) {
-    popupContent.textContent = "No attributes found on this feature.";
-  } else {
-    const table = document.createElement("table");
-    table.style.width = "100%";
-    table.style.borderCollapse = "collapse";
-
-    for (const k of keys) {
-      const tr = document.createElement("tr");
-
-      const tdK = document.createElement("td");
-      tdK.textContent = k;
-      tdK.style.fontWeight = "600";
-      tdK.style.padding = "4px 6px";
-      tdK.style.borderBottom = "1px solid rgba(0,0,0,0.08)";
-      tdK.style.verticalAlign = "top";
-      tdK.style.width = "45%";
-
-      const tdV = document.createElement("td");
-      const v = props[k];
-      tdV.textContent = (v === null || v === undefined) ? "" : String(v);
-      tdV.style.padding = "4px 6px";
-      tdV.style.borderBottom = "1px solid rgba(0,0,0,0.08)";
-      tdV.style.verticalAlign = "top";
-
-      tr.appendChild(tdK);
-      tr.appendChild(tdV);
-      table.appendChild(tr);
+    if (keys.length) {
+      const table = document.createElement("table");
+      table.style.cssText = "width: 100%; border-collapse: collapse;";
+      // Create table rows for each feature property (key-value pairs)
+      keys.forEach(k => {
+        const tr = document.createElement("tr");
+        const tdK = document.createElement("td");
+        tdK.textContent = k;
+        tdK.style.cssText = "font-weight: 600; padding: 4px 6px; border-bottom: 1px solid rgba(0,0,0,0.08); vertical-align: top; width: 45%;";
+        const tdV = document.createElement("td");
+        tdV.textContent = props[k] ?? "";
+        tdV.style.cssText = "padding: 4px 6px; border-bottom: 1px solid rgba(0,0,0,0.08); vertical-align: top;";
+        tr.appendChild(tdK);
+        tr.appendChild(tdV);
+        table.appendChild(tr);
+      });
+      content.appendChild(table);
+    } else {
+      content.textContent = "No attributes found on this feature.";
     }
 
-    popupContent.appendChild(table);
-  }
+    overlay.setPosition(evt.coordinate);
+  });
 
-  popupOverlay.setPosition(evt.coordinate);
-});
+  return closePopup;
+};
+
+const closePopup = createPopup();
 
 // ===========================
-// 7) Shapefile ZIP -> RAW GeoJSON (supports multiple layers)
+// Map zoom functions for fitting data
 // ===========================
-async function readZipAsRawGeoJSON(file) {
-  if (!window.JSZip) throw new Error("JSZip ontbreekt (jszip.min.js).");
-  if (!window.shp) throw new Error("shpjs ontbreekt (shp.min.js).");
+// Zoom to loaded data extent with padding and max zoom constraint
+const zoomToData = () => { 
+  const e = vectorSource.getExtent(); 
+  if (e && isFinite(e[0]) && isFinite(e[1]) && isFinite(e[2]) && isFinite(e[3])) { 
+    map.getView().fit(e, { padding: [40, 40, 40, 40], duration: 250, maxZoom: 10 }); 
+  } 
+  updateLastExtent();
+};
 
+// ===========================
+// File processing - Extract and parse shapefile ZIP
+// ===========================
+// Extract all shapefiles from ZIP archive and return as GeoJSON with layer info
+const readZipAsRawGeoJSON = async (file) => {
+  // Convert file to array buffer and load as ZIP archive
   const zipBuf = await file.arrayBuffer();
   const zip = await JSZip.loadAsync(zipBuf);
-
-  // Find all .shp files (multiple layers)
-  const shpNames = Object.keys(zip.files).filter((n) => n.toLowerCase().endsWith(".shp"));
-  const prjName = Object.keys(zip.files).find((n) => n.toLowerCase().endsWith(".prj"));
-
+  
+  // Find all .shp files in ZIP (can be multiple layers)
+  const shpNames = Object.keys(zip.files).filter(n => n.toLowerCase().endsWith(".shp"));
   if (shpNames.length === 0) throw new Error("Zip mist .shp of .dbf.");
-
-  const prjTxt = prjName ? await zip.files[prjName].async("string") : "";
+  
+  // Extract projection file if available (helps detect coordinate system)
+  const prjFile = Object.keys(zip.files).find(n => n.toLowerCase().endsWith(".prj"));
+  const prjTxt = prjFile ? await zip.files[prjFile].async("string") : "";
   const layers = [];
 
-  // Process each shapefile layer
   for (const shpName of shpNames) {
     const baseName = shpName.split(/[\\/]/).pop().replace(/\.shp$/i, "");
-    const dbfName = Object.keys(zip.files).find(
-      (n) => n.toLowerCase().endsWith(".dbf") && 
-             n.split(/[\\/]/).pop().replace(/\.dbf$/i, "").toLowerCase() === baseName.toLowerCase()
-    );
-
-    if (!dbfName) continue; // Skip if no matching DBF
+    const dbfName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith(".dbf") && n.split(/[\\/]/).pop().replace(/\.dbf$/i, "").toLowerCase() === baseName.toLowerCase());
+    if (!dbfName) continue;
 
     const shpBuf = await zip.files[shpName].async("arraybuffer");
     const dbfBuf = await zip.files[dbfName].async("arraybuffer");
+    const geojson = window.shp.combine([window.shp.parseShp(shpBuf), window.shp.parseDbf(dbfBuf)]);
 
-    const geometries = window.shp.parseShp(shpBuf);
-    const properties = window.shp.parseDbf(dbfBuf);
-    const geojson = window.shp.combine([geometries, properties]);
-
-    layers.push({
-      name: baseName,
-      geojson: geojson,
-      featureCount: geojson?.features?.length || 0
-    });
+    layers.push({ name: baseName, geojson, featureCount: geojson?.features?.length || 0 });
   }
 
   return { layers, prj: prjTxt };
-}
+};;
 
-function findFirstCoordPair(fc) {
-  const f = fc.features?.[0];
-  if (!f?.geometry?.coordinates) return null;
-
-  function findPair(coords) {
+// Helper: Extract first [x, y] coordinate pair from GeoJSON features
+// Used for coordinate system detection based on coordinate ranges
+const findFirstCoordPair = (fc) => {
+  // Recursively search nested coordinate arrays for a [x, y] pair
+  const findPair = (coords) => {
     if (!Array.isArray(coords)) return null;
+    // Check if this is a [x, y] pair (two numbers)
     if (coords.length >= 2 && typeof coords[0] === "number" && typeof coords[1] === "number") return coords;
-    for (const c of coords) {
-      const p = findPair(c);
-      if (p) return p;
-    }
+    // Recursively search nested arrays
+    for (const c of coords) { const p = findPair(c); if (p) return p; }
     return null;
-  }
+  };
+  // Get first feature and extract coordinates from geometry
+  return findPair(fc.features?.[0]?.geometry?.coordinates);
+};
 
-  return findPair(f.geometry.coordinates);
-}
-
-function detectDataProjection(fc, prjText) {
-  const first = findFirstCoordPair(fc);
-  console.log("First coordinate:", first);
-
-  const t = (prjText || "").toLowerCase();
-  const prjSaysRD =
-    t.includes("rd_new") ||
-    t.includes("amersfoort") ||
-    t.includes("double_stereographic") ||
-    t.includes("bessel_1841") ||
-    t.includes("sterea");
-
+// ===========================
+// Projection detection - determine if data is in RD or lat/lon
+// ===========================
+// Detects coordinate system by checking PRJ file keywords and coordinate ranges
+const detectDataProjection = (fc, prjText) => {
+  const first = findFirstCoordPair(fc); // Get first coordinate from data
+  // Check if PRJ file mentions Dutch coordinate system keywords
+  const prjSaysRD = (prjText || "").toLowerCase().match(/rd_new|amersfoort|double_stereographic|bessel_1841|sterea/);
+  
   if (first) {
     const [x, y] = first;
-
-    const looksLikeRD = x > 0 && x < 300000 && y > 250000 && y < 700000;
-    const looksLikeLonLat = x >= -180 && x <= 180 && y >= -90 && y <= 90;
-
-    if (looksLikeRD) return "EPSG:28992";
-    if (looksLikeLonLat) return "EPSG:4326";
+    // RD: x: 0-300000, y: 250000-700000 (Dutch bounds)
+    if ((x > 0 && x < 300000 && y > 250000 && y < 700000) || prjSaysRD) return "EPSG:28992";
+    // WGS84: x: -180 to 180, y: -90 to 90 (lat/lon)
+    if (x >= -180 && x <= 180 && y >= -90 && y <= 90) return "EPSG:4326";
   }
-
-  if (prjSaysRD) return "EPSG:28992";
-  return "EPSG:4326";
-}
+  return prjSaysRD ? "EPSG:28992" : "EPSG:4326";
+};
 
 // ===========================
-// 8) Layer visibility state
+// Display layer list with checkboxes for visibility toggle
 // ===========================
-const layerVisibility = {}; // Track which layers are visible
-
-// ===========================
-// 8b) Display layer information with toggles
-// ===========================
-function displayLayerInfo(layers) {
-  const layerNamesDiv = document.getElementById("layerNames");
+// Creates HTML checkboxes for each loaded layer showing name and feature count
+const displayLayerInfo = (layers) => {
+  const div = document.getElementById("layerNames");
+  if (!layers?.length) { div.style.display = "none"; return; }
   
-  if (!layers || layers.length === 0) {
-    layerNamesDiv.style.display = "none";
-    return;
-  }
+  // Build HTML for layer list with checkboxes
+  div.innerHTML = "<strong>Lagen geladen:</strong><br/>" + layers.map(l => {
+    const id = `layer-${l.name}`;
+    return `<div style="padding: 6px 0; font-size: 12px; display: flex; align-items: center; gap: 6px;"><input type="checkbox" id="${id}" data-layer="${l.name}" ${layerVisibility[l.name] !== false ? 'checked' : ''} style="cursor: pointer;" /><label for="${id}" style="cursor: pointer; margin: 0; flex: 1; text-align: left;">📍 <strong>${l.name}</strong> (${l.featureCount})</label></div>`;
+  }).join("");
+  div.style.display = "block";
 
-  let html = "<strong>Lagen geladen:</strong><br/>";
-  layers.forEach((layer) => {
-    const isVisible = layerVisibility[layer.name] !== false; // Default to visible
-    const checkboxId = `layer-${layer.name}`;
-    html += `
-      <div style="padding: 6px 0; font-size: 12px; display: flex; align-items: center; gap: 6px;">
-        <input type="checkbox" id="${checkboxId}" data-layer="${layer.name}" ${isVisible ? 'checked' : ''} style="cursor: pointer;" />
-        <label for="${checkboxId}" style="cursor: pointer; margin: 0; flex: 1; text-align: left;">
-          📍 <strong>${layer.name}</strong> (${layer.featureCount})
-        </label>
-      </div>
-    `;
-  });
-
-  layerNamesDiv.innerHTML = html;
-  layerNamesDiv.style.display = "block";
-
-  // Attach toggle event listeners
-  layerNamesDiv.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
-    checkbox.addEventListener('change', (e) => {
-      const layerName = e.target.getAttribute('data-layer');
-      toggleLayer(layerName, e.target.checked);
+  // Attach change event listeners to all layer visibility checkboxes
+  div.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', (e) => {
+    layerVisibility[e.target.dataset.layer] = e.target.checked;
+    vectorSource.getFeatures().forEach(f => {
+      if (f.get('_layerName') === e.target.dataset.layer) f.set('_visible', e.target.checked);
     });
-  });
-}
+    vectorLayer.changed();
+  }));
+};
 
 // ===========================
-// 8c) Toggle layer visibility
+// Load shapefile from ZIP and render on map with all features
 // ===========================
-function toggleLayer(layerName, isVisible) {
-  layerVisibility[layerName] = isVisible;
-  
-  // Update features visibility
-  vectorSource.getFeatures().forEach((feature) => {
-    const featureLayer = feature.get('_layerName');
-    if (featureLayer === layerName) {
-      feature.set('_visible', isVisible);
-    }
-  });
-
-  // Refresh the vector layer to apply the style changes
-  vectorLayer.changed();
-}
-
-// ===========================
-// 9) Load Shapefile (.zip) and render into RD map
-// ===========================
-async function loadShapefileZip(file) {
+// Extracts layers, detects projection, tags features with metadata, and displays
+const loadShapefileZip = async (file) => {
   setLoading(true, "Shapefile inlezen…");
-
   const { layers, prj } = await readZipAsRawGeoJSON(file);
-  if (!layers || layers.length === 0) throw new Error("Geen features gevonden in shapefile.");
+  if (!layers?.length) throw new Error("Geen features gevonden in shapefile.");
 
-  // Collect all features from all layers
   const allFeatures = [];
   let dataProjection = null;
 
   for (const layer of layers) {
     if (!layer.geojson?.features?.length) continue;
-    
-    // Detect projection from first layer with features
-    if (!dataProjection) {
-      dataProjection = detectDataProjection(layer.geojson, prj);
-      console.log("Using dataProjection:", dataProjection);
-    }
+    if (!dataProjection) dataProjection = detectDataProjection(layer.geojson, prj);
 
-    const features = new ol.format.GeoJSON().readFeatures(layer.geojson, {
-      dataProjection,
-      featureProjection: "EPSG:28992"
+    // Tag each feature with its layer name and set visibility, then add to collection
+    new ol.format.GeoJSON().readFeatures(layer.geojson, { dataProjection, featureProjection: "EPSG:28992" }).forEach(f => {
+      f.set('_layerName', layer.name);
+      f.set('_visible', true);
+      allFeatures.push(f);
     });
-
-    // Tag features with their layer name
-    features.forEach((feature) => {
-      feature.set('_layerName', layer.name);
-      feature.set('_visible', true);
-    });
-
-    allFeatures.push(...features);
   }
 
-  if (allFeatures.length === 0) throw new Error("Geen features gevonden in shapefile.");
-
+  if (!allFeatures.length) throw new Error("Geen features gevonden in shapefile.");
   vectorSource.clear(true);
   vectorSource.addFeatures(allFeatures);
-
-  // Display layer information
   displayLayerInfo(layers);
-
-  // Close old popup if any
   closePopup();
-
   zoomToData();
-}
+};
 
 // ===========================
-// 10) Main handler
+// Main file upload handler - validates and processes shapefile ZIP
 // ===========================
-async function handleFile(file) {
+// Entry point for file uploads from drop zones or file picker controls
+const handleFile = async (file) => {
   clearError();
-
-  const name = file.name.toLowerCase();
-  if (!name.endsWith(".zip")) {
-    showError("Upload een .zip shapefile.");
-    return;
+  
+  // Validate file is a ZIP file
+  if (!file.name.toLowerCase().endsWith(".zip")) { 
+    showError("Upload een .zip shapefile."); 
+    return; 
   }
-
+  
   try {
-    setLoading(true, "Bestand verwerken…");
-    clearMap();
-
+    setLoading(true);
+    vectorSource.clear(true);
     await loadShapefileZip(file);
-
     setLoading(false);
+    // Update back button display with loaded filename
+    updateBackDropZoneDisplay(file.name);
     switchToMapScreen();
   } catch (err) {
     console.error(err);
     setLoading(false);
     showError(err?.message || String(err));
   }
-}
+};
 
 // ===========================
-// 11) Export to Excel
+// Export functionality - Convert map data to Excel workbook
 // ===========================
-function sanitizeSheetName(name) {
-  // Excel sheet names cannot exceed 31 characters and cannot contain: [ ] : * ? / \
-  let sanitized = name.replace(/[\[\]:*?/\\]/g, '_');
-  // Truncate to 31 characters
-  return sanitized.substring(0, 31);
-}
-
-function exportToExcel() {
-  // Check if XLSX library is loaded
-  if (typeof XLSX === 'undefined') {
-    showError("Excel library is nog niet geladen. Probeer het later.");
-    return;
-  }
-
+// Sanitize sheet name: remove invalid Excel characters and truncate to 31 chars
+const sanitizeSheetName = (name) => name.replace(/[\[\]:*?/\\]/g, '_').substring(0, 31);
+// Export visible features to Excel workbook with one sheet per layer
+const exportToExcel = () => {
+  // Check XLSX library is loaded
+  if (typeof XLSX === 'undefined') { showError("Excel library is nog niet geladen."); return; }
   const features = vectorSource.getFeatures();
-  
-  if (features.length === 0) {
-    showError("Geen data om te exporteren.");
-    return;
-  }
+  if (!features.length) { showError("Geen data om te exporteren."); return; }
 
-  // Collect data from visible features grouped by layer
   const layerData = {};
-
-  features.forEach((feature) => {
-    const layerName = feature.get('_layerName') || 'Default';
-    const isVisible = feature.get('_visible') !== false;
-
-    // Only export visible features
-    if (!isVisible) return;
-
-    if (!layerData[layerName]) {
-      layerData[layerName] = [];
-    }
-
-    const props = feature.getProperties();
+  // Collect visible features grouped by layer, extracting only attribute properties
+  features.forEach(f => {
+    const visible = f.get('_visible') !== false;
+    if (!visible) return;
+    const layer = f.get('_layerName') || 'Default';
+    if (!layerData[layer]) layerData[layer] = [];
+    const props = { ...f.getProperties() };
     delete props.geometry;
     delete props._layerName;
     delete props._visible;
-
-    layerData[layerName].push(props);
+    layerData[layer].push(props);
   });
 
   try {
-    // Create workbook with sheets for each layer
     const workbook = XLSX.utils.book_new();
-    const usedSheetNames = new Set();
-
-    Object.keys(layerData).forEach((layerName) => {
-      const data = layerData[layerName];
-      if (data.length > 0) {
-        // Sanitize and truncate sheet name
-        let sheetName = sanitizeSheetName(layerName);
-        
-        // Handle duplicate sheet names by appending a number
-        let finalName = sheetName;
-        let counter = 1;
-        while (usedSheetNames.has(finalName)) {
-          finalName = sanitizeSheetName(sheetName.slice(0, 28) + '_' + counter);
-          counter++;
-        }
-        usedSheetNames.add(finalName);
-
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(workbook, worksheet, finalName);
-      }
+    const usedNames = new Set();
+    // Create Excel worksheet for each layer, handling duplicate sheet names
+    Object.entries(layerData).forEach(([name, data]) => {
+      if (!data.length) return;
+      let finalName = sanitizeSheetName(name);
+      let counter = 1;
+      while (usedNames.has(finalName)) finalName = sanitizeSheetName(name.slice(0, 28) + '_' + counter++);
+      usedNames.add(finalName);
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(data), finalName);
     });
-
-    // Generate filename with timestamp
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `quickdataviewer_export_${timestamp}.xlsx`;
-
-    // Trigger download
-    XLSX.writeFile(workbook, filename);
+    XLSX.writeFile(workbook, `quickdataviewer_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
   } catch (err) {
-    console.error('Export error:', err);
+    console.error(err);
     showError("Er is een fout opgetreden bij het exporteren naar Excel.");
   }
-}
+};
 
 // ===========================
-// 12) Drop / input events
+// Drop zone event setup - reusable for multiple feedback zones
 // ===========================
-dropZone.addEventListener("click", () => fileInput.click());
-dropZone.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" || e.key === " ") fileInput.click();
-});
-dropZone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  dropZone.classList.add("drag-over");
-});
-dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
-dropZone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  dropZone.classList.remove("drag-over");
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
-});
-fileInput.addEventListener("change", () => {
-  if (fileInput.files[0]) handleFile(fileInput.files[0]);
-  fileInput.value = "";
-});
+// Attaches click, keyboard, drag, and file input listeners to a drop zone
+const setupDropZone = (zone, input, handler) => {
+  // Click handler: open file picker when clicking zone
+  zone.addEventListener("click", () => input.click());
+  
+  // Keyboard handler: open file picker on Enter or Space key
+  zone.addEventListener("keydown", (e) => { 
+    if (["Enter", " "].includes(e.key)) { 
+      e.preventDefault(); 
+      input.click(); 
+    } 
+  });
+  
+  // Drag over: add highlight when dragging files over zone
+  zone.addEventListener("dragover", (e) => { 
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    zone.classList.add("drag-over");
+  });
+  
+  // Drag leave: remove highlight when leaving zone
+  zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+  
+  // Drop: process dropped file(s)
+  zone.addEventListener("drop", (e) => { 
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    zone.classList.remove("drag-over"); 
+    if (e.dataTransfer.files[0]) handler(e.dataTransfer.files[0]); 
+  });
+  
+  // File input change: process selected file from picker
+  input.addEventListener("change", () => { 
+    if (input.files[0]) { 
+      handler(input.files[0]); 
+      input.value = ""; 
+    } 
+  });
+};
+
+setupDropZone(dropZone, fileInput, handleFile); // Initialize main upload drop zone
+
+// ===========================
+// Back button drop zone display management
+// ===========================
+// Update back drop zone to show loaded filename instead of upload prompt
+const updateBackDropZoneDisplay = (fileName) => {
+  const uploadPrompt = document.getElementById("back-zone-upload-prompt");
+  const fileDisplay = document.getElementById("back-zone-file-display");
+  const fileNameEl = document.getElementById("back-zone-file-name");
+  
+  // Hide upload prompt and show file display
+  if (uploadPrompt) uploadPrompt.style.display = "none";
+  if (fileDisplay) fileDisplay.style.display = "block";
+  if (fileNameEl) fileNameEl.textContent = fileName; // Show the filename
+};
+
+// Reset back drop zone to show upload prompt when clearing data
+const resetBackDropZoneDisplay = () => {
+  const uploadPrompt = document.getElementById("back-zone-upload-prompt");
+  const fileDisplay = document.getElementById("back-zone-file-display");
+  
+  // Show upload prompt and hide file display
+  if (uploadPrompt) uploadPrompt.style.display = "block";
+  if (fileDisplay) fileDisplay.style.display = "none";
+};
+
+// ===========================
+// Back button drop zone initialization
+// ===========================
+// Enables file replacement directly from map screen using back button
+const initializeBackDropZone = () => {
+  const zone = document.getElementById("back-drop-zone");
+  const input = document.getElementById("back-file-input");
+  
+  // Validate elements exist before setting up event listeners
+  if (!zone || !input) { 
+    console.error("Back drop zone elements not found!"); 
+    return; 
+  }
+  
+  // Reuse drop zone setup for back button functionality
+  setupDropZone(zone, input, handleFile);
+};

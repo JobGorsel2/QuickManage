@@ -115,7 +115,7 @@ body {
 }
 .quickDataViewer .controlpanel_dataviewer {
   z-index: 999;
-  position: fixed;
+  position: relative;
   top: 0px;
   bottom: 0px;
   gap: 10px;
@@ -125,35 +125,108 @@ body {
   opacity: 90%;
   max-width: 250px;
 }
-.quickDataViewer .controlpanel_dataviewer .menu_dataviewer {
-  display: grid;
-  margin-top: 60px;
-}
-.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .btn {
+.quickDataViewer .controlpanel_dataviewer .btn {
   margin-top: 10px;
-  color: #000;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+}
+.quickDataViewer .controlpanel_dataviewer .action_buttons {
+  position: absolute;
+  bottom: 40px;
+  left: 0px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.quickDataViewer .controlpanel_dataviewer .action_buttons .zoomTodata {
+  background-color: #cd7b00;
+  color: #fff;
+  opacity: 100%;
+}
+.quickDataViewer .controlpanel_dataviewer .action_buttons .zoomTodata:hover {
+  background-color: #aa6600 !important;
+}
+.quickDataViewer .controlpanel_dataviewer .action_buttons .removeData {
+  background-color: transparent;
+  color: #ff0800;
+  opacity: 100%;
+  border: 2px solid #ff0800;
+  transition: 0.5s;
+}
+.quickDataViewer .controlpanel_dataviewer .action_buttons .removeData:hover {
+  background-color: #c9302c !important;
+  color: #fff;
+}
+.quickDataViewer .controlpanel_dataviewer .action_buttons .export {
+  background-color: #006600;
+  color: #fff;
+  opacity: 100%;
+}
+.quickDataViewer .controlpanel_dataviewer .action_buttons .export:hover {
+  background-color: #009700 !important;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer {
+  position: relative;
+  float: left;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone {
+  margin-top: 50px;
+  width: 100%;
+  border: 2.5px dashed #3a8c3a;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   cursor: pointer;
+  transition: 0.5s;
+  padding: 40px 24px;
+  background: #f4faf4;
+  position: relative;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone:hover, .quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone.drag-over {
+  background-color: hsla(120, 34%, 52%, 0.199);
+  border-color: #006600;
+  color: #000;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone.drag-over #back-drop-hint {
+  display: block !important;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone.drag-over .btn {
+  display: none;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone .back-zone-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone .loaded-file-label {
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone .loaded-file-name {
+  font-size: 13px;
+  color: #3a8c3a;
+  font-weight: 600;
+  word-break: break-word;
+  max-width: 100%;
+  text-align: center;
+  margin: 0;
+  padding: 8px;
+  background: rgba(90, 173, 90, 0.1);
+  border-radius: 4px;
+}
+.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone .back-zone-reload-hint {
+  font-size: 11px;
+  color: #666;
+  margin: 0;
+  font-style: italic;
 }
 .quickDataViewer .controlpanel_dataviewer .menu_dataviewer .upload {
   background-color: #2c2c2c;
-  color: #fff;
-  opacity: 100%;
-}
-.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .zoomTodata {
-  background-color: #3a8c3a;
-  color: #fff;
-  opacity: 100%;
-}
-.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .removeData {
-  background-color: #d9534f;
-  color: #fff;
-  opacity: 100%;
-}
-.quickDataViewer .controlpanel_dataviewer .menu_dataviewer .export {
-  background-color: #0275d8;
   color: #fff;
   opacity: 100%;
 }
