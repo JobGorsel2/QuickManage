@@ -138,7 +138,7 @@
       <div class="row">
         <div class="col-lg-12 text-center">
           <div class="menu_dataviewer">
-            <button id="back-button" class="btn upload" data-action="back">Terug naar upload </button>
+            <button id="back-button" class="btn upload" data-action="back">Terug naar upload</button>
             <button id="zoom-button" class="btn zoomTodata" data-action="zoom">Zoom naar data</button>
             <button id="export-button" class="btn export" data-action="export">Exporteer naar Excel</button>
             
@@ -148,13 +148,12 @@
         </div>
       </div>
     </div>
-  
     <div class="footer_dataviewer">
       <div class="row">
         <div class="col-lg-12 text-center">
           <div class="footer-img">
             <img src="{{ asset('storage/footer.png') }}" class="logo" />
-              
+              <span>Mocht u problemen ondervinden, neem dan contact op met de beheerder.</span>
           </div>
         </div>
       </div>
