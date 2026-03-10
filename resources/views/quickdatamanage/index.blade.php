@@ -150,7 +150,7 @@
     </div>
   
     <div class="footer_dataviewer">
-      <div class="row">
+      <div class="row"> 
         <div class="col-lg-12 text-center">
           <div class="footer-img">
             <img src="{{ asset('storage/footer.png') }}" class="logo" />
