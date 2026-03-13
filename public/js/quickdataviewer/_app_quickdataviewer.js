@@ -56,12 +56,23 @@ const pdokWmtsSource = new ol.source.WMTS({
 // ===========================
 // Vector feature styling - appearance of shapefile features on map
 // ===========================
-// Returns orange style for visible features, null for hidden ones (not rendered)
-const getFeatureStyle = (feature) => feature.get('_visible') !== false ? new ol.style.Style({
-  fill: new ol.style.Fill({ color: "rgba(231, 151, 3, 0.58)" }), // Orange fill for polygons
-  stroke: new ol.style.Stroke({ color: "rgb(173, 81, 1)", width: 2 }), // Dark orange border
-  image: new ol.style.Circle({ radius: 6, fill: new ol.style.Fill({ color: "rgba(255, 165, 0, 0.75)" }), stroke: new ol.style.Stroke({ color: "rgba(255, 120, 0, 1)", width: 2 }) })
-}) : null; // Return null to hide feature on map
+// Returns blue style for selected features, orange for visible, null for hidden ones
+const getFeatureStyle = (feature) => {
+  if (feature.get('_selected') === true) {
+    // Blue style with higher opacity for selected features
+    return new ol.style.Style({
+      fill: new ol.style.Fill({ color: "rgba(0, 102, 204, 0.8)" }), // Bright blue fill
+      stroke: new ol.style.Stroke({ color: "rgb(0, 51, 153)", width: 3 }), // Dark blue border, thicker
+      image: new ol.style.Circle({ radius: 8, fill: new ol.style.Fill({ color: "rgba(0, 102, 204, 0.9)" }), stroke: new ol.style.Stroke({ color: "rgb(0, 51, 153)", width: 3 }) })
+    });
+  }
+  // Orange style for normal visible features
+  return feature.get('_visible') !== false ? new ol.style.Style({
+    fill: new ol.style.Fill({ color: "rgba(231, 151, 3, 0.58)" }), // Orange fill for polygons
+    stroke: new ol.style.Stroke({ color: "rgb(173, 81, 1)", width: 2 }), // Dark orange border
+    image: new ol.style.Circle({ radius: 6, fill: new ol.style.Fill({ color: "rgba(255, 165, 0, 0.75)" }), stroke: new ol.style.Stroke({ color: "rgba(255, 120, 0, 1)", width: 2 }) })
+  }) : null; // Return null to hide feature on map
+};
 
 // ===========================
 // Vector layer setup for displaying shapefile features
@@ -86,6 +97,8 @@ const map = new ol.Map({
 let lastDataExtent = null;
 // Track visibility state for each layer by name (layer name -> boolean)
 const layerVisibility = {};
+// Track currently selected feature for highlighting in blue
+let selectedFeature = null;
 // Update stored extent when features are added to the map
 const updateLastExtent = () => { const e = vectorSource.getExtent(); lastDataExtent = (e && isFinite(e[0]) && isFinite(e[2])) ? e.slice() : null; };
 vectorSource.on("addfeature", updateLastExtent); // Update extent on feature add
@@ -115,6 +128,7 @@ const createControlPane = () => {
       vectorSource.clear(true); // Remove all features from map
       closePopup?.(); // Close any open attribute popup
       lastDataExtent = null; // Reset stored extent
+      selectedFeature = null; // Clear selection state
       // Reset all layer visibility states when clearing the map
       Object.keys(layerVisibility).forEach(key => delete layerVisibility[key]);
       document.getElementById("layerNames").style.display = "none"; // Hide layer panel
@@ -159,7 +173,15 @@ const createPopup = () => {
   const overlay = new ol.Overlay({ element: popupEl, autoPan: true, autoPanAnimation: { duration: 200 }, offset: [0, -10] });
   map.addOverlay(overlay);
 
-  const closePopup = () => overlay.setPosition(undefined);
+  const closePopup = () => {
+    // Clear selection when popup closes
+    if (selectedFeature) {
+      selectedFeature.set('_selected', false);
+      selectedFeature = null;
+      vectorLayer.changed(); // Trigger redraw to remove blue highlight
+    }
+    overlay.setPosition(undefined);
+  };
   closer.addEventListener("click", closePopup);
 
   map.on("pointermove", (evt) => (map.getTargetElement().style.cursor = map.hasFeatureAtPixel(evt.pixel) ? "pointer" : ""));
@@ -167,8 +189,19 @@ const createPopup = () => {
     const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f);
     if (!feature) { closePopup(); return; }
     
+    // Clear previous selection
+    if (selectedFeature) {
+      selectedFeature.set('_selected', false);
+    }
+    // Set new feature as selected and highlight in blue
+    selectedFeature = feature;
+    feature.set('_selected', true);
+    vectorLayer.changed(); // Trigger redraw to show blue highlight
+    
     const props = { ...feature.getProperties() };
     delete props.geometry;
+    delete props._visible;
+    delete props._selected;
     const keys = Object.keys(props);
 
     title.textContent = keys.length ? "Attributes" : "No attributes";
@@ -294,7 +327,7 @@ const displayLayerInfo = (layers) => {
   // Build HTML for layer list with checkboxes
   div.innerHTML = "<strong>Lagen geladen:</strong><br/>" + layers.map(l => {
     const id = `layer-${l.name}`;
-    return `<div style="padding: 6px 0; font-size: 12px; display: flex; align-items: center; gap: 6px;"><input type="checkbox" id="${id}" data-layer="${l.name}" ${layerVisibility[l.name] !== false ? 'checked' : ''} style="cursor: pointer;" /><label for="${id}" style="cursor: pointer; margin: 0; flex: 1; text-align: left;">📍 <strong>${l.name}</strong> (${l.featureCount})</label></div>`;
+    return `<div style="padding: 6px 0; font-size: 12px; display: flex; align-items: flex-start; gap: 6px; min-width: 0;"><input type="checkbox" id="${id}" data-layer="${l.name}" ${layerVisibility[l.name] !== false ? 'checked' : ''} style="cursor: pointer; flex-shrink: 0; margin-top: 2px;" /><label for="${id}" class="layer-label">📍 <strong>${l.name}</strong> (${l.featureCount})</label></div>`;
   }).join("");
   div.style.display = "block";
 

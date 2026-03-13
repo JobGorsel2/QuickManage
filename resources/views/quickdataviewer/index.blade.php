@@ -38,8 +38,12 @@
             <!-- header -->
             <section class="header">
               <div class="container">
-                <div class="row header-logo">
-                  <div class="col-lg-12 text-center">
+                <div class="row header-logo  align-items-center">
+                  <div class="col-md-4 fl-l">
+                    <a href="https://gis.gkbgroep.nl/Apps/GKB-App-Gallery/index.html" class="overzicht_link fl-l"> <img src="
+                      {{ asset('storage/conversie_logo.png') }}" class="conversie_logo"> Apps </a>
+                  </div>
+                  <div class="col-md-4 text-center">
                     <img src="{{ asset('storage/gkb-groen.png') }}" class="logo" />
                   </div>
                 </div>
@@ -128,11 +132,14 @@
 
   <div class="container-fluid quickDataViewer p-0" id="map"   style="display:none;">
     <div class="header_dataviewer">
-      <div class="row">
-        <div class="col-lg-12 text-center p-1">
-          <h4>QuickDataViewer</h4>
+      <div class="row header-logo  align-items-center">
+          <div class="col-md-4 fl-l">
+              <a href="https://gis.gkbgroep.nl/Apps/GKB-App-Gallery/index.html" class="overzicht_link_viewer fl-l"> <img src="{{ asset('storage/conversie_logo.png') }}" class="conversie_logo"> Apps </a>
+          </div>
+            <div class="col-md-4 text-center">
+              <h4>GKB GIS Viewer (beta)</h4>
+            </div>
         </div>
-      </div>
     </div>
     <div id="controlpanel_dataviewer" class="controlpanel_dataviewer">
       <div class="row">
@@ -189,8 +196,68 @@
     </div>
   </div>
    
- 
-  <script src="/js/app_quickdataviewer.js"></script>
+  <script>
+    // Simple initialization without modules - easier to debug
+    console.log("📍 QuickDataViewer initializing...");
+    
+    // Wait for all external libraries to load
+    function waitForDependencies(callback, timeout = 10000) {
+      const start = Date.now();
+      const required = {
+        'proj4': () => typeof proj4 !== 'undefined',
+        'ol': () => typeof ol !== 'undefined',
+        'JSZip': () => typeof JSZip !== 'undefined',
+        'shp': () => typeof window.shp !== 'undefined',
+        'XLSX': () => typeof XLSX !== 'undefined'
+      };
+
+      const checkDeps = setInterval(() => {
+        const missing = Object.entries(required)
+          .filter(([name, check]) => !check())
+          .map(([name]) => name);
+
+        if (missing.length === 0) {
+          clearInterval(checkDeps);
+          console.log('✓ All dependencies loaded');
+          callback();
+        } else if (Date.now() - start > timeout) {
+          clearInterval(checkDeps);
+          console.error('❌ Timeout waiting for:', missing.join(', '));
+          const errorMsg = document.getElementById('error-msg');
+          if (errorMsg) errorMsg.textContent = 'Failed to load required libraries: ' + missing.join(', ');
+          const errorBox = document.getElementById('error-box');
+          if (errorBox) errorBox.classList.remove('hidden');
+        }
+      }, 100);
+    }
+
+    waitForDependencies(() => {
+      // Test if DOM elements exist
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("file-input");
+      
+      console.log("Checking elements:");
+      console.log("- #drop-zone:", !!dropZone);
+      console.log("- #file-input:", !!fileInput);
+      
+      if (!dropZone || !fileInput) {
+        console.error("❌ Required DOM elements not found!");
+        return;
+      }
+      
+      // Now load the module
+      import('/js/quickdataviewer/index.js')
+        .then(() => console.log("✓ Module loaded successfully"))
+        .catch(err => {
+          console.error('❌ Module load error:', err);
+          console.error('Full error:', err.toString());
+          const errorMsg = document.getElementById('error-msg');
+          if (errorMsg) errorMsg.textContent = 'Module error: ' + err.message;
+          const errorBox = document.getElementById('error-box');
+          if (errorBox) errorBox.classList.remove('hidden');
+        });
+    });
+  </script>
 
 
 </body>

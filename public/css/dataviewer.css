@@ -94,6 +94,37 @@ body {
   height: 40px;
 }
 
+img.conversie_logo {
+  height: 25px;
+}
+
+a.overzicht_link {
+  padding: 8px;
+  background-color: hsla(98, 64%, 29%, 0.041);
+  text-decoration: none !important;
+  color: #5f5f5f !important;
+  font-weight: 400;
+  transition: 0.5s !important;
+  border-radius: 5px;
+  border: 1px solid hsla(98, 63%, 23%, 0.075);
+}
+
+a.overzicht_link:hover {
+  color: #326116 !important;
+  background-color: hsla(98, 64%, 29%, 0.096);
+}
+
+a.overzicht_link_viewer {
+  padding: 8px;
+  background-color: #fff;
+  text-decoration: none !important;
+  color: #000 !important;
+  font-weight: 400;
+  transition: 0.5s !important;
+  border-radius: 5px;
+  border: 1px solid hsla(98, 63%, 23%, 0.075);
+}
+
 /* end header  */
 /* content  */
 .quickDataViewer {
@@ -166,7 +197,6 @@ body {
 }
 .quickDataViewer .controlpanel_dataviewer .menu_dataviewer {
   position: relative;
-  float: left;
 }
 .quickDataViewer .controlpanel_dataviewer .menu_dataviewer .back-drop-zone {
   margin-top: 50px;
@@ -252,6 +282,18 @@ body {
 }
 
 /* end content  */
+/* Layer names styling */
+.layer-label {
+  cursor: pointer;
+  margin: 0;
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
+
 /* loading */
 /* end loading  */
 /* footer  */
