@@ -232,7 +232,7 @@
     }
 
     waitForDependencies(() => {
-      // Test if DOM elements exist
+      // Test if DOM elements exist 
       const dropZone = document.getElementById("drop-zone");
       const fileInput = document.getElementById("file-input");
       

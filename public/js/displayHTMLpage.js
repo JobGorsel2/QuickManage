@@ -33,26 +33,27 @@ const data = window.templateChoice;
                 const parameters = workspaceData.parameters;
                 const container = document.getElementById('GKB_Form_Template');
                 // foreach alle parameters 
+                let req = '';
                 parameters.forEach(param => {
-
-                    if (param.optional === true) {
-                        req ='';
-                    } else if (param.optional === false) {
-                        req ='*';  
+                     
+                    if (param.required !== false) {
+                        req ='*';
+                    } else if (param.required === false) {
+                        req =' ';  
                     }
 
                     const label = document.createElement('label');
-                    label.textContent = param.description + req || param.name +req;
-                    label.setAttribute('for', param.name);
+                    label.textContent = (param.description || param.prompt) + req;
+                    label.setAttribute('for', param.prompt);
 
                     let input;
                     let selectFileText;
                     // console.log(param)
                     // check if parameter type is string
-                    if (param.type === 'STRING') { 
+                    if (param.type === 'text') { 
                         // console.log(param.name)
                         // als parameter required is ( dus hij is niet optioneel )
-                        if(param.optional == false) {
+                        if(param.required !== false) {
 
                             input = document.createElement('input');
                             input.type = 'text';
@@ -62,7 +63,7 @@ const data = window.templateChoice;
                             input.className = 'input-form';
                             input.setAttribute("data-required","true");
                         // als parameter required is ( dus hij is optioneel )
-                        } else if (param.optional == true) {
+                        } else if (param.required == false) {
 
                             input = document.createElement('input');
                             input.type = 'text';
@@ -74,10 +75,10 @@ const data = window.templateChoice;
                         }
 
                         // check if parameter type is file
-                    } else if (param.type === 'FILE_OR_URL' || param.type === 'list') {
+                    } else if (param.type === 'file' || param.type === 'list') {
                         // als parameter required is ( dus hij is niet optioneel )
-                        if(param.optional == false) {
-
+                        if(param.required !== false) {
+                         
                             selectFileText = document.createElement('label');
                             selectFileText.id = 'data_label';
                             selectFileText.textContent = 'Selecteer hier uw bestand';
@@ -96,8 +97,8 @@ const data = window.templateChoice;
                             selectFileText.textContent = file ? file.name : 'Selecteer hier uw bestand';
                             });
                         // als parameter niet required is ( dus hij is optioneel)
-                        } else if (param.optional == true) {
-
+                        } else if (param.required == false) {
+                                    
                             selectFileText = document.createElement('label');
                             selectFileText.id = 'data_label';
                             selectFileText.textContent = 'Selecteer hier uw bestand';
@@ -118,8 +119,8 @@ const data = window.templateChoice;
                         }
                     
                         
-                    } else if (param.type === 'CHECKBOX') { 
-                        if(param.optional == false){
+                    } else if (param.type === 'checkbox') { 
+                        if(param.required !== false){
                             input = document.createElement('input');
                             input.type = 'checkbox';
                             input.name = param.name;
@@ -129,7 +130,7 @@ const data = window.templateChoice;
                             input.setAttribute("data-required","true");
                         }
                             
-                        else if(param.optional == true){
+                        else if(param.required == false){
                             input = document.createElement('input');
                             input.type = 'checkbox';
                             input.name = param.name;
@@ -186,7 +187,7 @@ const data = window.templateChoice;
                 inputs.forEach(input => {
                     const isRequired = input.hasAttribute('data-required') && input.getAttribute('data-required') === 'true';
 
-                if (isRequired) {
+               if (isRequired) {
                         if (input.type === 'file') {
                             if (input.files.length === 0) {
                                 const label = document.querySelector(`label[for="${input.name}_req"]`);
@@ -196,11 +197,9 @@ const data = window.templateChoice;
                             } else {
                                 const label = document.querySelector(`label[for="${input.name}_req"]`);
                                 if (label) label.classList.remove('outline_red2');
+                                formData.append('files', input.files[0], input.files[0].name);
+                                inputFiles = true;
                             }
-                            if (input.files.length > 0) {
-                            formData.append(input.name, input.files[0]);
-                            }
-                             inputFiles = true;
                         }
 
                         if (input.type === 'text') {
@@ -230,8 +229,8 @@ const data = window.templateChoice;
                         
                 } else { }
                             input.addEventListener('change', function () {
-    console.log(this.value);
-});
+                            console.log(this.value);
+                        });
                 });
                  
                 if (!isValid) {
@@ -242,10 +241,10 @@ const data = window.templateChoice;
                         console.log("Form correct!");
                          document.getElementById("mess1").style.display = 'block';
                         document.getElementById("loading").style.display = 'flex';
-                      
+
                         if(inputFiles === true){
                             console.log(inputFiles)
-                            // uploadToServerAndStartWorkspace();
+                            uploadToServerAndStartWorkspace();
                         } else if ( inputFiles === false ) {
 
                             const workspaceParams = [];
@@ -258,7 +257,7 @@ const data = window.templateChoice;
  
                             });
                             
-                            // StartWorkspace(workspaceParams);
+                            StartWorkspace(workspaceParams);
                             
                         }
                         // uploadToServerAndStartWorkspace();
@@ -272,7 +271,8 @@ const data = window.templateChoice;
                 function uploadToServerAndStartWorkspace() {
                     // here make post requests to fme server to upload the file, then after success response run function StartWorkspace that sends an post request to the api to run the workspace. POST with the input values and file names.
                         // upload files to /FME_SHAREDRESOURCE_TEMP/filesys
-                         fetch('https://fme-gkb.fmecloud.com/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_TEMP/filesys', {
+                        console.log('Ditis de formdata:',formData)
+                         fetch('https://fme-gkb.fmecloud.com/fmeapiv4/resources/connections/FME_SHAREDRESOURCE_TEMP/upload?path&overwrite=true ', {
                                 method: 'POST',
                                 headers: {
                                     "Authorization": "fmetoken token=653d48815e91626f06f6ed871b3810605193ac02",
@@ -296,7 +296,7 @@ const data = window.templateChoice;
                                     if (input.type === 'file' && input.files.length > 0) {
                                         workspaceParams.push({
                                             name: input.name,
-                                            value: ["$(FME_SHAREDRESOURCE_TEMP)/" + input.files[0].name]
+                                            value: "$(FME_SHAREDRESOURCE_TEMP)/" + input.files[0].name
                                         });
                                     } else {
                                         workspaceParams.push({
@@ -319,18 +319,24 @@ const data = window.templateChoice;
                     const repo = window.templateChoice.repository;
                     const workspaceName = window.templateChoice.workspace;
 
-                    
-                    const jsonArrayDef = JSON.stringify({ publishedParameters });
-                    // console.log(jsonArray)
-
-                    fetch(`https://fme-gkb.fmecloud.com/fmerest/v3/transformations/transact/${repo}/${workspaceName}`, {
+                    // Convert array of {name, value} to object {name: value}
+                    const paramsObject = {};
+                    publishedParameters.forEach(p => {
+                        paramsObject[p.name] = p.value;
+                    });
+                    console.log(paramsObject)
+                    fetch(`https://fme-gkb.fmecloud.com/fmeapiv4/jobs/sync`, {
                         method: 'POST',
                         headers: {
                             "Authorization":"fmetoken token=653d48815e91626f06f6ed871b3810605193ac02", 
                             "Content-Type":"application/json",
                             "Accept":"application/json",
                         },
-                        body: jsonArrayDef
+                        body: JSON.stringify({
+                            repository: repo,
+                            workspace: workspaceName,
+                            publishedParameters: paramsObject,
+                        })
                     })
                     .then(res => {
                         if (!res.ok) throw new Error(`Workspace start failed: ${res.status}`);
