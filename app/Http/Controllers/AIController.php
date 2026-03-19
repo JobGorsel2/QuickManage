@@ -10,15 +10,14 @@ class AIController extends Controller
 {
     public function index() 
     {   
-        $client_id = env('ARCGIS_CLIENT_ID');
+        $client_id = config('services.arcgis.client_id');
 
         // $token = session('arcgis.access_token'); // if you have it
         // // dd($token);
 
         // $layerUrl = 'https://services9.arcgis.com/CjT8oELYhF7fnj6q/arcgis/rest/services/Testpunten/FeatureServer/0';
         // $allowedFields = $this->getLayerFields($layerUrl, $token);
-
-
+ 
         // ophalen van projectcodes
         $layerUrl = 'https://services9.arcgis.com/CjT8oELYhF7fnj6q/arcgis/rest/services/GKB_DL_Bomen/FeatureServer/0/query';
         $token = session('arcgis.access_token');
@@ -46,7 +45,7 @@ class AIController extends Controller
             $params['token'] = $token;
         }
 
-        $res = Http::withOptions(['verify' => false])
+        $res = Http::withOptions(['verify' => app()->isProduction()])
             ->get($layerUrl, $params)
             ->json();
 
@@ -79,12 +78,12 @@ class AIController extends Controller
 
         //withOptions(['verify' => false]) alleen gebruiken in local developmode 
 
-        $response = Http::withOptions(['verify' => false])->asForm()->post($portal . '/sharing/rest/oauth2/token', [
+        $response = Http::withOptions(['verify' => app()->isProduction()])->asForm()->post($portal . '/sharing/rest/oauth2/token', [
             'client_id'     => config('services.arcgis.client_id'),
             'client_secret' => config('services.arcgis.client_secret'),
             'grant_type'    => 'authorization_code',
             'code'          => $code,
-            'redirect_uri'  => 'http://localhost:3000/oauth-callback',
+            'redirect_uri'  => config('services.arcgis.redirect_uri'),
             'f'             => 'json',
         ]);
 
@@ -109,15 +108,14 @@ class AIController extends Controller
         session([
             'arcgis.access_token' => $accessToken,
             'arcgis.expires_in'   => $data['expires_in'] ?? null,
+            'arcgis.expires_at'   => isset($data['expires_in']) ? now()->addSeconds($data['expires_in'])->timestamp : null,
             'arcgis.username'     => $data['username'] ?? null,
         ]);
 
         return redirect()->route('testAI')->with('status', 'ArcGIS connected.');
     }
 
-    /////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////
+ 
     /////////////////////////////////////////////////////////
     // Functions Ollama call
 
@@ -360,7 +358,7 @@ class AIController extends Controller
  
     private function getLayerFields(string $layerUrl, string $token): array
     {
-        $res = Http::withOptions(['verify' => false])->get($layerUrl, [
+        $res = Http::withOptions(['verify' => app()->isProduction()])->get($layerUrl, [
             'f' => 'json',
             'token' => $token,
         ])->json();

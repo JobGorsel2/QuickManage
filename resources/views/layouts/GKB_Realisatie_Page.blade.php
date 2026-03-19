@@ -33,7 +33,7 @@
     <script src="https://js.arcgis.com/4.28/"></script>
     
 </head>
-<body style='background-color:{{ $data->template->background_color }};'>
+<body style='background-color:{{ preg_match("/^#[0-9a-fA-F]{3,6}$/", $data->template->background_color ?? "") ? $data->template->background_color : "#ffffff" }};'>
     <div id="app">
         <main>
             @yield('content')

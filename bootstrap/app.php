@@ -16,5 +16,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Catch database connection failures and show a user-friendly page
+        $dbConnectionHandler = function (\Throwable $e) {
+            $msg = $e->getMessage();
+            $code = (string) $e->getCode();
+            $isConnectionError = str_contains($code, '2002')
+                || str_contains($msg, '2002')
+                || str_contains($msg, 'Connection refused')
+                || str_contains($msg, 'SQLSTATE[HY000]');
+
+            if ($isConnectionError) {
+                return response()->view('errors.db-connection', [], 503);
+            }
+        };
+
+        $exceptions->render(function (\Illuminate\Database\QueryException $e) use ($dbConnectionHandler) {
+            return $dbConnectionHandler($e);
+        });
+
+        $exceptions->render(function (\PDOException $e) use ($dbConnectionHandler) {
+            return $dbConnectionHandler($e);
+        });
     })->create();

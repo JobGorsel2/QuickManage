@@ -35,7 +35,7 @@ class TemplatesController extends Controller
 
         $request->validate([
             'name' => 'required|unique:templates,name',
-            'image' => 'nullable|image',
+            'image' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
         ]);
         // dd($request['image']);
         if($request['image']) {
@@ -72,11 +72,10 @@ class TemplatesController extends Controller
         
         $request->validate([
             'name' => 'required',
-            'image_thumbnail' => 'nullable|image',
-            'header_logo' => 'nullable|image',
-            'footer_image' => 'nullable|image',
-            'background_color' => ' ',
-
+            'image_thumbnail' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
+            'header_logo' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
+            'footer_image' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
+            'background_color' => 'nullable|string|regex:/^#[0-9a-fA-F]{3,6}$/',
         ]);
 
         if($request['image_thumbnail']) {$image_thumbnail = base64_encode(file_get_contents($request->file('image_thumbnail')));} else {$image_thumbnail= '';}

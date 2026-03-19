@@ -52,11 +52,7 @@ class PageController extends Controller
         $allData = $request->all();
          
     // Separate parameter_* fields
-        $unique = base64_encode(date("m-d-Y H:i:s:"));
-        $unique .= base64_encode("DKkda#dkvmd)lda_d-e0mwmas01#9dmxMWdiaPWOQ0n3");
-        $numb = rand(1000000000,1000000000000);
-        $numb2 = base64_encode($numb);
-        $unique .=$numb2;
+        $unique = Str::random(64);
         
         $page = new Page();
         $page->name = $request['name'];

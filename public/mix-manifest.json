@@ -2,5 +2,6 @@
     "/js/app.js": "/js/app.js",
     "/css/style.css": "/css/style.css",
     "/css/dataviewer.css": "/css/dataviewer.css",
+    "/css/errors_style.css": "/css/errors_style.css",
     "/css/testAI.css": "/css/testAI.css"
 }

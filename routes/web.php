@@ -12,48 +12,46 @@ use App\Http\Controllers\Auth\LogoutAGOLController;
 | contains the "web" middleware group. Now create something great!
 |
 */
- Route::get('/ping', fn() => 'pong');
-;
+Route::get('/ping', fn() => 'pong');
+
 Route::get('/', function () {
     return view('auth.login');
 });
 
-Auth::routes(['verify' => true ]);
+Auth::routes(['verify' => true]);
 
- 
-// Route::get('/oauth-callback.html', [App\Http\Controllers\DashboardController::class, 'index']);
-Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index']);                                       
-                    
-Route::get('/pages', [App\Http\Controllers\PageController::class, 'index']) ;                   
-Route::get('/pages/create', [App\Http\Controllers\PageController::class, 'create']) ;                   
-Route::post('/pages/store', [App\Http\Controllers\PageController::class, 'store']) ;                    
-Route::get('/pages/view/{unique}', [App\Http\Controllers\PageController::class, 'show']) ;                  
-Route::get('/pages/edit/{unique}', [App\Http\Controllers\PageController::class, 'edit']) ;                  
-Route::patch('/pages/update/{id}', [App\Http\Controllers\PageController::class, 'update']) ;                    
-Route::delete('/pages/delete/{id}', [App\Http\Controllers\PageController::class, 'destroy']) ;                  
-                    
-Route::get('/folders', [App\Http\Controllers\FoldersController::class, 'index']) ;
-Route::get('/folder/create', [App\Http\Controllers\FoldersController::class, 'create']) ;
-Route::post('/folders/store', [App\Http\Controllers\FoldersController::class, 'store']) ;
-Route::get('/folders/view/{id}', [App\Http\Controllers\FoldersController::class, 'show']) ;
-Route::delete('/folders/delete/{id}', [App\Http\Controllers\FoldersController::class, 'delete']) ;
+// All routes below require authentication
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index']);
 
-Route::get('/profile/{id}/edit', [App\Http\Controllers\ProfileController::class, 'edit']);
-Route::patch('/profile/{id}', [App\Http\Controllers\ProfileController::class, 'update']);
+    Route::get('/pages', [App\Http\Controllers\PageController::class, 'index']);
+    Route::get('/pages/create', [App\Http\Controllers\PageController::class, 'create']);
+    Route::post('/pages/store', [App\Http\Controllers\PageController::class, 'store']);
+    Route::get('/pages/view/{unique}', [App\Http\Controllers\PageController::class, 'show']);
+    Route::get('/pages/edit/{unique}', [App\Http\Controllers\PageController::class, 'edit']);
+    Route::patch('/pages/update/{id}', [App\Http\Controllers\PageController::class, 'update']);
+    Route::delete('/pages/delete/{id}', [App\Http\Controllers\PageController::class, 'destroy']);
 
-Route::get('/templates', [App\Http\Controllers\TemplatesController::class, 'index']);
-Route::get('/template/create', [App\Http\Controllers\TemplatesController::class, 'create']);
-Route::get('/template/edit/{unique}', [App\Http\Controllers\TemplatesController::class, 'edit']);
-Route::patch('/template/update/{unique}', [App\Http\Controllers\TemplatesController::class, 'update']);
-Route::post('/template/store', [App\Http\Controllers\TemplatesController::class, 'store']);
+    Route::get('/folders', [App\Http\Controllers\FoldersController::class, 'index']);
+    Route::get('/folder/create', [App\Http\Controllers\FoldersController::class, 'create']);
+    Route::post('/folders/store', [App\Http\Controllers\FoldersController::class, 'store']);
+    Route::get('/folders/view/{id}', [App\Http\Controllers\FoldersController::class, 'show']);
+    Route::delete('/folders/delete/{id}', [App\Http\Controllers\FoldersController::class, 'delete']);
 
-Route::get('/account', [App\Http\Controllers\AccountController::class, 'index']);
+    Route::get('/profile/{id}/edit', [App\Http\Controllers\ProfileController::class, 'edit']);
+    Route::patch('/profile/{id}', [App\Http\Controllers\ProfileController::class, 'update']);
 
-Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index']);
+    Route::get('/templates', [App\Http\Controllers\TemplatesController::class, 'index']);
+    Route::get('/template/create', [App\Http\Controllers\TemplatesController::class, 'create']);
+    Route::get('/template/edit/{unique}', [App\Http\Controllers\TemplatesController::class, 'edit']);
+    Route::patch('/template/update/{unique}', [App\Http\Controllers\TemplatesController::class, 'update']);
+    Route::post('/template/store', [App\Http\Controllers\TemplatesController::class, 'store']);
 
-Auth::routes();
- 
-                 
+    Route::get('/account', [App\Http\Controllers\AccountController::class, 'index']);
+    Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index']);
+    Route::get('/quickdataviewer', [App\Http\Controllers\QuickDataViewerController::class, 'index']);
+});
+
 Route::get('/arcgis/loginAGOL', function () {
     $portal = rtrim(config('services.arcgis.portal'), '/');
 
@@ -63,24 +61,18 @@ Route::get('/arcgis/loginAGOL', function () {
             'response_type' => 'code',
             'redirect_uri'  => config('services.arcgis.redirect_uri'),
         ])
-    ); 
+    );
 })->name('arcgis.loginAGOL');
 
-Route::middleware(['arcgis.required'])->group(function () {
- Route::get('/testAI', [App\Http\Controllers\AIController::class, 'index'])->name('testAI');
- Route::post('/logoutAGOL', [LogoutAGOLController::class, 'logout'])
-    ->name('logoutAGOL');
+Route::middleware(['auth', 'arcgis.required'])->group(function () {
+    Route::get('/testAI', [App\Http\Controllers\AIController::class, 'index'])->name('testAI');
+    Route::post('/logoutAGOL', [LogoutAGOLController::class, 'logout'])->name('logoutAGOL');
 });
-                                      
-Route::get('/oauth-callback', [App\Http\Controllers\AIController::class, 'callback']);  
 
-// ai routes
-Route::post('/ai/nl2where', [App\Http\Controllers\AIController::class, 'nl2where'])
-    ->name('ai.nl2where');
+Route::get('/oauth-callback', [App\Http\Controllers\AIController::class, 'callback']);
 
-Route::get('/ai/nl2where-stream', [App\Http\Controllers\AIController::class, 'nl2whereStream']);
-
-
-
-
-Route::get('/quickdataviewer', [App\Http\Controllers\QuickDataViewerController::class, 'index']);
+// AI routes (require auth + rate limiting)
+Route::middleware(['auth', 'throttle:10,1'])->group(function () {
+    Route::post('/ai/nl2where', [App\Http\Controllers\AIController::class, 'nl2where'])->name('ai.nl2where');
+    Route::get('/ai/nl2where-stream', [App\Http\Controllers\AIController::class, 'nl2whereStream']);
+});

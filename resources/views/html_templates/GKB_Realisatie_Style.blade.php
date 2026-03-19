@@ -13,7 +13,7 @@
               <div class="container">
                 <div class="row header-logo">
                   <div class="col-lg-12 text-center">
-                    <img src="data:image;base64,{{ $data->template->header_logo }}" class="logo" />
+                    <img src="data:image/png;base64, {{ $data->template->header_logo }}" class="logo" />
                   </div>
                 </div>
                 <div class="row">
@@ -141,7 +141,7 @@
                 <div class="row">
                   <div class="col-lg-12 text-center">
                     <div class="footer-img">
-                      <img src="data:image;base64,{{ $data->template->footer_image}}" />
+                      <img src="data:image/png;base64,{{ $data->template->footer_image }}" />
                     </div>
                   </div>
                 </div>

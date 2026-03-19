@@ -29,7 +29,7 @@
                                 <div class="template-box">
                                 
                                     
-                                    <img src="data:image;base64,{{ $data->dummy_image }}"> 
+                                    <img src="data:image/png;base64,{{ $data->dummy_image }}"> 
                                     <p>{!! $data->name !!}</p>
                                     
                                 </div>

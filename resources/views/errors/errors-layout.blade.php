@@ -16,32 +16,42 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('storage/fav-cm.png') }}">
      
-    <title>{{ config('app.name', 'QuickManage') }}</title>
+    <title>{{ config('app.name', 'QuickManage') }} @yield('title')</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/errors-style.css') }}" >
+    <link rel="stylesheet" href="{{ asset('css/errors_style.css') }}" >
 
     <!-- Scripts -->
     
     
 </head>
+
 <body>
-<div class="error-wrapper">
+
+    <div class="error-card">
          
-         <div class="code">
-              @yield('code') 
-         </div>
-         <div class="message">
-             @yield('message')
-         </div>
-        
-     </div>
+        <div class="error-code">@yield('code')</div>
+
+        <div class="error-title">@yield('title')</div>
+
+        <div class="badge-db">&#9888; @yield('badge')</div>
+
+        <div class="error-message">@yield('message')</div>
+
+        <div >@yield('button')</div>
+
+        <div class="footer-note">@yield('footer')</div>
+
+    </div>
+
 </body>
-<foot>
- 
+
+<footer>
+{{--  
     <script src="/js/menu.js"></script>
-    <script src="/js/main.js"></script>
-</foot>
+    <script src="/js/main.js"></script> --}}
+</footer>
+
 </html>
