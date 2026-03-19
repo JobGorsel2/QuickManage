@@ -32,6 +32,16 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/pages/update/{id}', [App\Http\Controllers\PageController::class, 'update']);
     Route::delete('/pages/delete/{id}', [App\Http\Controllers\PageController::class, 'destroy']);
 
+    Route::get('/app-gallery', [App\Http\Controllers\AppGalleryController::class, 'index']);
+    Route::get('/app-gallery/create', [App\Http\Controllers\AppGalleryController::class, 'create']);
+    Route::post('/app-gallery/store', [App\Http\Controllers\AppGalleryController::class, 'store']);
+    Route::get('/app-gallery/category/view/{unique}', [App\Http\Controllers\AppGalleryController::class, 'show']);
+    Route::get('/app-gallery/edit/{unique}', [App\Http\Controllers\AppGalleryController::class, 'edit']);
+    Route::patch('/app-gallery/update/{id}', [App\Http\Controllers\AppGalleryController::class, 'update']);
+    Route::delete('/app-gallery/delete/{id}', [App\Http\Controllers\AppGalleryController::class, 'destroy']);
+
+
+
     Route::get('/folders', [App\Http\Controllers\FoldersController::class, 'index']);
     Route::get('/folder/create', [App\Http\Controllers\FoldersController::class, 'create']);
     Route::post('/folders/store', [App\Http\Controllers\FoldersController::class, 'store']);
@@ -47,7 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/template/update/{unique}', [App\Http\Controllers\TemplatesController::class, 'update']);
     Route::post('/template/store', [App\Http\Controllers\TemplatesController::class, 'store']);
 
-    Route::get('/account', [App\Http\Controllers\AccountController::class, 'index']);
+    Route::get('/accounts', [App\Http\Controllers\AccountController::class, 'index']);
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index']);
     Route::get('/quickdataviewer', [App\Http\Controllers\QuickDataViewerController::class, 'index']);
 });

@@ -8,7 +8,8 @@
             
             <ul>
                 <li><a href="/dashboard" id="dashboard"> <i class="fa-solid fa-gauge"></i> <span> Dashboard   </span></a></li>
-                <li><a href="/profile/{{ Auth::id() }}/edit" id="profile"> <i class="fa-solid fa-user"></i> <span> Profiel</span></a></li>
+                <li><a href="/profile/{{Auth::user()->id}}/edit" id="profile"> <i class="fa-solid fa-user"></i> <span> Profiel</span></a></li>
+                <li><a href="/app-gallery" id="app-gallery""> <i class="fa-solid fa-table-cells"></i> <span> App Gallery</span></a></li>
                 <li><a href="/folders" id="folders" class="pages""> <i class="fa-solid fa-file"></i> <span> HTML Pagina's</span></a></li>
                 <li><a href="/templates" id="templates"> <i class="fa-solid fa-pencil"></i> <span> Templates</span></a></li>
                 <li><a href="/accounts" id="accounts"> <i class="fa-solid fa-users"></i> <span> Accounts</span></a></li>
@@ -43,6 +44,7 @@
                 <ul>
                     <li><a href="/dashboard" id="dashboard"> <i class="fa-solid fa-gauge"></i></a></li>
                     <li><a href="/profile/{{Auth::user()->id}}/edit" id="profile"> <i class="fa-solid fa-user"></i></a></li>
+                    <li><a href="/app-gallery" id="app-gallery""> <i class="fa-solid fa-table-cells"></i></a></li>
                     <li><a href="/folders" id="folders" class="pages"> <i class="fa-solid fa-file"></i></a></li>
                     <li><a href="/templates"> <i class="fa-solid fa-pencil"></i></a></li>
                     <li><a href="/accounts"> <i class="fa-solid fa-users"></i></a></li>
@@ -59,6 +61,8 @@
 
                     var a = document.getElementById("dashboard").id;
                     var b = document.getElementById("profile").id;
+                    var h = document.getElementById("app-gallery").id;
+
                     var c = document.getElementById("folders").id;
                     var d = document.getElementById("templates").id;
                     var e = document.getElementById("accounts").id;
@@ -72,6 +76,12 @@
                     if(b==firstPath){
                         var x = document.getElementById("profile");
                         x.classList.add("selected");
+                    }
+                    if(h==firstPath){
+                        var x = document.getElementById("app-gallery");
+                        
+                        x.classList.add("selected");
+                       
                     }
                     if(c==firstPath){
                         var x = document.getElementById("folders");

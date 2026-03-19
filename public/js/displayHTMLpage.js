@@ -1,8 +1,5 @@
 const data = window.templateChoice;
-    // const DBparameters = window.DBparameters;
-     
-    // console.log(DBparameters);
-    
+   
     const repo = data['repository'];
     const workspaceName = data['workspace'];
     

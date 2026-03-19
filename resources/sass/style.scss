@@ -647,6 +647,45 @@ width: 40%;
         }
     } 
 
+ 
+        .app-category-card{
+            margin-top: 20px;
+            
+            padding: 20px;
+            a{
+                padding: 20px 0px;
+                font-weight: 600;
+                color: #fff !important;
+                text-decoration: none;
+            }
+            .app-category-card-body{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding:20px;
+                text-align: center;
+                background-color: #439034;
+                transition: 0.5s;
+                height: 250px;
+                border-radius: 5px;
+                &:hover{
+                   background-color: #347427;
+                }
+                img{
+                    height: 100%;
+                    padding: 20px;
+                }
+                p {
+                    padding: 20px 0px;
+                    font-weight: 600;
+                    background-color: #439034;
+                    color: #fff !important;
+                }
+            }
+        }
+   
+
 }
 
 //profile
@@ -730,7 +769,8 @@ width: 40%;
     &:hover{
      color:#347427;   
     }
-}
+} 
+ 
 //keyframes
 
 // @mixin keyframes($param_field) {
