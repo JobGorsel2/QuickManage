@@ -1,0 +1,146 @@
+body {
+  background-color: #2c2c2c !important;
+}
+
+.content {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.content-wrapper {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  background-color: #fff;
+  border-radius: 15px;
+}
+
+/* header */
+.header .header-logo {
+  background-color: hsla(110, 47%, 38%, 0.1);
+  padding: 10px;
+}
+.header .logo {
+  height: 40px;
+}
+.header img.conversie_logo {
+  height: 25px;
+}
+.header button.overzicht_link {
+  padding: 8px;
+  background-color: hsla(98, 64%, 29%, 0.041);
+  text-decoration: none !important;
+  color: #5f5f5f !important;
+  font-weight: 400;
+  transition: 0.5s !important;
+  border-radius: 5px;
+  border: 1px solid hsla(98, 63%, 23%, 0.075);
+}
+.header button.overzicht_link:hover {
+  color: #326116 !important;
+  background-color: hsla(98, 64%, 29%, 0.096);
+}
+.header .header_home_screen,
+.header .header_gisapps_screen,
+.header .header_administratie_screen,
+.header .header_projecten_screen {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  padding: 20px;
+}
+.header #header_gisapps_screen,
+.header #header_administratie_screen,
+.header #header_projecten_screen {
+  display: none;
+}
+
+/* end header */
+/* home screen */
+.home_screen .col_gisapps,
+.home_screen .col_administratie,
+.home_screen .col_projecten {
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 60px;
+}
+.home_screen .col_gisapps button,
+.home_screen .col_administratie button,
+.home_screen .col_projecten button {
+  background-color: #509429;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  min-height: 80px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+  width: 100%;
+}
+.home_screen .col_gisapps button:hover,
+.home_screen .col_administratie button:hover,
+.home_screen .col_projecten button:hover {
+  background-color: #3d6f1f;
+  box-shadow: 0px 0px 8px 3px #dfdfdf;
+}
+
+/* end home screen */
+/* content */
+.body {
+  padding: 30px;
+}
+.body .app_wrapper {
+  display: inline-grid;
+  background-color: rgba(230, 230, 230, 0.329);
+  padding: 20px;
+  border-radius: 5px;
+  min-height: 220px;
+  border: 2px solid #d5d5d5;
+  transition: 0.5s;
+  box-shadow: 0px 5px 8px 0px #d9d9d9;
+}
+.body .app_wrapper:hover {
+  border: 2px solid #429029;
+  box-shadow: 0px 0px 2px 2px #dfdfdf;
+  background-color: hsla(109, 47%, 38%, 0.055);
+}
+.body .app_wrapper #app_logo {
+  height: 80px;
+  width: auto;
+}
+.body a.link_app {
+  color: #000 !important;
+  text-decoration: none !important;
+}
+.body a.link_app:hover {
+  color: #000;
+}
+.body .bold {
+  font-weight: 600;
+}
+
+/* end content */
+/* footer */
+.footer {
+  margin-top: 100px;
+}
+.footer a.emailgis {
+  color: #000 !important;
+}
+.footer .footer_logo {
+  padding: 20px;
+  background-color: hsla(110, 47%, 38%, 0.1);
+}
+.footer .footer-img img {
+  height: 12px;
+  opacity: 90%;
+}
+
+/* end footer */
+@media screen and (max-width: 992px) {
+  .app_wrapper {
+    display: block;
+  }
+}

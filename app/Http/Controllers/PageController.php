@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\WorkspaceParameter;
 use Illuminate\Support\Str;
 use App\Models\Page;
+use App\Models\AppCategorie;
 use App\Models\Template;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -40,9 +40,11 @@ class PageController extends Controller
         // $var = 'TEST'; 
 
          $templates = Template::get();
+         $categories = AppCategorie::get();
 
         return view('pages.pages.create',[
             'templates' => $templates,
+            'categories' => $categories,
         ]);
     }
 
@@ -50,7 +52,7 @@ class PageController extends Controller
     {
 
         $allData = $request->all();
-         
+      
     // Separate parameter_* fields
         $unique = Str::random(64);
         
@@ -62,50 +64,12 @@ class PageController extends Controller
         $page->workspace = $request['workspace'];
         $page->service = $request['service'];
         $page->folder_id = session('folder_id');
+        $page->cat_id = $request['category'];
         $page->hash_id = $unique;
         $page->save();
 
-
-        $parameterData = [];
-        $pageData = [];
-                    
-        foreach ($allData as $key => $value) {
-            if (str_starts_with($key, 'parameter_')) {
-                $parameterData[$key] = $value;
-                  
-            } elseif (!in_array($key, ['_token', 'submit'])) {
-                $pageData[$key] = $value;
-            }
-        }
-        $parameterDataCleaned = [];
-        foreach ($parameterData as $key => $value) {
-            $cleanKey = Str::after($key, 'parameter_'); // or use substr($key, 10)
-            $parameterDataCleaned[$cleanKey] = $value;
-            [$parameterName, $fieldType] = explode(',', $cleanKey);
-            // $parameter->field_type = $fieldType;
-
-            // dd($parameterName);
-
-            $parameter = new WorkspaceParameter();
-            $parameter->parameter_name = $parameterName;
-            $parameter->field_type = $fieldType;
-            $parameter->page_id = $page->id;
-            $parameter->save();
-        }
-        // foreach ($parameterDataCleaned as $key => $value) {
-        //     $parameter = new WorkspaceParameter();
-        //     $parameter->parameter_name = $key;
-        //     $parameter->page_id = $page->id;
-        //     $parameter->save();
-        // }
-        // $author = Auth::user()->name;
-
-        // $page = new Page;
-        // $page->name = $request->input('name');
-        
-        // $page->hash_id = $unique;
-        
-        // $page->save();
+ 
+      
         // //redirect
         return back()->with('success','Pagina aangemaakt!');
     }
@@ -132,15 +96,19 @@ class PageController extends Controller
 
     public function edit($id) 
     {
-        $page = Page::with('template','folder')
+        $page = Page::with('template','folder','app_category')
         ->where('id', $id)
         ->first();
+        $categories = AppCategorie::get();
+     
+
 
         // dd($page);
 
         //redirect
         return view('pages.pages.edit', [
             'page' => $page,       
+            'categories' => $categories,
         ]);
     }
 
@@ -150,6 +118,8 @@ class PageController extends Controller
         $page = Page::find($id);
         $page->name = $req->input('name');
         $page->description = $req->input('description');
+        $page->cat_id = $req->input('category');
+
         $page->save();
         //redirect
         return back()->with('success','Pagina bijgewerkt!');

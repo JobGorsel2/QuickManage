@@ -33,12 +33,13 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/pages/delete/{id}', [App\Http\Controllers\PageController::class, 'destroy']);
 
     Route::get('/app-gallery', [App\Http\Controllers\AppGalleryController::class, 'index']);
-    Route::get('/app-gallery/create', [App\Http\Controllers\AppGalleryController::class, 'create']);
-    Route::post('/app-gallery/store', [App\Http\Controllers\AppGalleryController::class, 'store']);
-    Route::get('/app-gallery/category/view/{unique}', [App\Http\Controllers\AppGalleryController::class, 'show']);
-    Route::get('/app-gallery/edit/{unique}', [App\Http\Controllers\AppGalleryController::class, 'edit']);
-    Route::patch('/app-gallery/update/{id}', [App\Http\Controllers\AppGalleryController::class, 'update']);
-    Route::delete('/app-gallery/delete/{id}', [App\Http\Controllers\AppGalleryController::class, 'destroy']);
+    Route::get('/app-gallery/category/create', [App\Http\Controllers\AppGalleryController::class, 'create']);
+    Route::post('/app-gallery/category/store', [App\Http\Controllers\AppGalleryController::class, 'store']);
+    Route::get('/app-gallery/category/{unique}', [App\Http\Controllers\AppGalleryController::class, 'show']);
+    Route::get('/app-gallery/category/edit/{unique}', [App\Http\Controllers\AppGalleryController::class, 'edit']);
+    Route::patch('/app-gallery/category/update/{id}', [App\Http\Controllers\AppGalleryController::class, 'update']);
+    Route::delete('/app-gallery/category/delete/{id}', [App\Http\Controllers\AppGalleryController::class, 'destroy']);
+
 
 
 
@@ -61,6 +62,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index']);
     Route::get('/quickdataviewer', [App\Http\Controllers\QuickDataViewerController::class, 'index']);
 });
+
+Route::get('/app-gallery/gkb', [App\Http\Controllers\AppGalleryController::class, 'GKB_AppGallery_Page']);
+
 
 Route::get('/arcgis/loginAGOL', function () {
     $portal = rtrim(config('services.arcgis.portal'), '/');

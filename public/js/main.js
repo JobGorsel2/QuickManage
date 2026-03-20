@@ -21,32 +21,6 @@ function showFile(input) {
 
 }
 
-
-// update page add paramters
-var formfield = document.getElementById('formfield');
-var formfield2 = document.getElementById('formfield2');
-var x = []
-function addField() {
-
-  var newField = document.createElement("input");
-  newField.setAttribute('type','text');
-  newField.setAttribute('name','param');
-  newField.setAttribute('class','param_field');
-
-  newField.setAttribute('placeholder','Parameter...');
-  formfield.appendChild(newField);
-  x.push(newField);
-  console.log(x)
-}
-
-function removeField(){
-    var input_tags = formfield.getElementsByTagName('input');
-    if(input_tags.length > 0) {
-      formfield.removeChild(input_tags[(input_tags.length) - 1]);
-      
-    }
-  }
-
 // copy text to clipboard function 
 function copyText() {
   // Get the text field

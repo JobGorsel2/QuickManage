@@ -12,10 +12,10 @@ body {
 }
 
 .successMessage {
-  background-color: #fff !important;
-  border: 3px solid #347427 !important;
+  background-color: #fff;
+  border: 2px solid #fff !important;
   color: #347427 !important;
-  box-shadow: 0px 0px 10px 0px #696969;
+  box-shadow: 0px 0px 6px 0px #aaaaaa;
 }
 
 .c-bold {
@@ -325,6 +325,74 @@ body {
   background-color: rgb(255, 255, 255);
   border-radius: 5px;
   padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-container .category_change_input {
+  max-width: auto;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: none;
+  border-bottom: 1px solid #347427;
+  outline: none;
+}
+.header-container .actions-wrapper {
+  display: flex;
+  align-items: center;
+}
+.header-container .actions-wrapper button {
+  border: none;
+  background-color: #b90606;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: 0.5s;
+}
+.header-container .actions-wrapper button:hover {
+  background-color: #b90606;
+}
+.header-container .actions-wrapper i {
+  padding: 5px;
+}
+.header-container .actions-wrapper .fa-check, .header-container .actions-wrapper .fa-xmark, .header-container .actions-wrapper .fa-pen-to-square {
+  margin-right: 10px;
+}
+.header-container .actions-wrapper .fa-check {
+  background-color: #439034;
+  color: #fff !important;
+  padding: 10px !important;
+  transition: 0.5s;
+  border-radius: 5px;
+}
+.header-container .actions-wrapper .fa-check:hover {
+  background-color: #347427;
+  cursor: pointer;
+}
+.header-container .actions-wrapper .fa-xmark {
+  background-color: #b90606;
+  color: #fff !important;
+  padding: 10px !important;
+  transition: 0.5s;
+  border-radius: 5px;
+}
+.header-container .actions-wrapper .fa-xmark:hover {
+  background-color: #9c0505;
+  cursor: pointer;
+}
+.header-container .actions-wrapper .fa-pen-to-square {
+  background-color: #439034;
+  color: #fff !important;
+  padding: 10px !important;
+  transition: 0.5s;
+  border-radius: 5px;
+}
+.header-container .actions-wrapper .fa-pen-to-square:hover {
+  background-color: #347427;
+  cursor: pointer;
 }
 
 .body-container {
@@ -437,25 +505,25 @@ body {
 .body-container .body-header-text {
   padding: 8px;
 }
-.body-container .create-form {
+.body-container .create-form, .body-container .edit-form {
   padding: 20px !important;
 }
-.body-container .create-form select {
+.body-container .create-form select, .body-container .edit-form select {
   background-color: hsla(109, 47%, 38%, 0.041) !important;
   border: none;
   padding: 10px;
   width: 100%;
 }
-.body-container .create-form input[type=radio] {
+.body-container .create-form input[type=radio], .body-container .edit-form input[type=radio] {
   float: right;
   height: 20px;
   width: 20px;
   accent-color: #439034;
 }
-.body-container .create-form option {
+.body-container .create-form option, .body-container .edit-form option {
   background-color: #fff;
 }
-.body-container .create-form .workspace_parameters_title {
+.body-container .create-form .workspace_parameters_title, .body-container .edit-form .workspace_parameters_title {
   display: flex;
   justify-content: space-between;
 }
@@ -488,7 +556,7 @@ body {
 }
 .body-container .create-item {
   padding: 20px;
-  padding-left: 0px;
+  padding-left: 10px;
   margin-bottom: 16px;
 }
 .body-container .create-item a {

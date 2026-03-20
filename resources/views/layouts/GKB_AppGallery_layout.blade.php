@@ -22,13 +22,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('storage/fav-cm.png') }}">
      
-    <title>{{ config('app.name', 'QuickManage') }}</title>
+    <title>{{  'GKB App Gallery' }}</title>
  
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
  
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}" >
+    <link rel="stylesheet" href="{{ asset('css/app_gallery.css') }}" >
 
     <!-- Scripts -->
     
@@ -37,7 +37,7 @@
             
     
 </head>
-<body>
+<body  onload="onBodyLoad()">  
     <div id="app">
         <main>
             @yield('content')
@@ -45,78 +45,9 @@
     </div>
 </body>
 <footer>
-<script>
-        $("document").ready(function(){
-        setTimeout(function(){
-        $("div.successMessage").remove();
-    }, 2000); 
-});
-    </script>
-    <script src="/js/menu.js"></script>
-    <script src="/js/main.js"></script>
+ 
+    <script src="/js/app_gallery/GKB_AppGallery_Page.js"></script>
+    
 
-    @if(Str::startsWith(request()->path(), 'app-gallery'))
-    <script src="/js/app_gallery/category.js"></script>
-    @endif
-     
-    {{-- Session timeout warning popup --}}
-    @auth
-    <div id="session-timeout-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-        <div style="background:#fff; border-radius:8px; padding:30px 40px; max-width:420px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
-            <i class="fa-solid fa-clock" style="font-size:48px; color:#f0ad4e; margin-bottom:15px;"></i>
-            <h4 style="margin-bottom:10px;">Sessie verloopt bijna</h4>
-            <p style="color:#666; margin-bottom:20px;">U wordt automatisch uitgelogd over <strong id="session-countdown"></strong> seconden.</p>
-            <button id="session-extend-btn" style=" background-color: #439034;color:#fff;border:none;outline:none;border-radius: 3px;padding:8px 15px;transition: 0.5s;">Sessie verlengen</button>
-            <form id="session-timeout-logout" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
-        </div>
-    </div>
-    <script>
-    (function() {
-        var sessionLifetime = {{ config('session.lifetime') }};
-        var warningSeconds = 60;
-        var warningMs = (sessionLifetime * 6 - warningSeconds) * 10000;
-  
-        var timer, countdownInterval, remaining = warningSeconds;
-        var overlay = document.getElementById('session-timeout-overlay');
-        var countdownEl = document.getElementById('session-countdown');
-
-        function resetTimer() {
-            clearTimeout(timer);
-            clearInterval(countdownInterval);
-            overlay.style.display = 'none';
-            remaining = warningSeconds;
-            timer = setTimeout(showWarning, warningMs);
-        }
-
-        function showWarning() {
-            remaining = warningSeconds;
-            countdownEl.textContent = remaining;
-            overlay.style.display = 'flex';
-            countdownInterval = setInterval(function() {
-                remaining--;
-                countdownEl.textContent = remaining;
-                if (remaining <= 0) {
-                    clearInterval(countdownInterval);
-                    document.getElementById('session-timeout-logout').submit();
-                }
-            }, 1000);
-        }
-
-        document.getElementById('session-extend-btn').addEventListener('click', function() {
-            fetch('/ping', { credentials: 'same-origin' }).then(function() { resetTimer(); });
-        });
-
-        ['mousemove', 'keydown', 'click', 'scroll'].forEach(function(evt) {
-            document.addEventListener(evt, function() {
-                if (overlay.style.display === 'none' || overlay.style.display === '') {
-                    resetTimer();
-                }
-            }, { passive: true });
-        });
-
-        resetTimer();
-    })();
-    </script>
-    @endauth
 </footer>
 </html>

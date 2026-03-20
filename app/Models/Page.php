@@ -17,4 +17,9 @@ class Page extends Model
     {
         return $this->belongsTo(Folder::class, 'folder_id', 'id');
     }
+
+     public function app_category()
+    {
+        return $this->belongsTo(AppCategorie::class, 'cat_id', 'id');
+    }
 }

@@ -34,10 +34,10 @@ transform: translate(-50%, -50%);
 width: 40%;
 }
 .successMessage{
-    background-color: #fff !important;
-    border:3px solid #347427 !important;
+    background-color:#fff;
+    border:2px solid #fff !important;
     color:#347427 !important;
-    box-shadow: 0px 0px 10px 0px #696969;;
+    box-shadow: 0px 0px 6px 0px #aaaaaa;;
 }
   
 .c-bold{
@@ -366,6 +366,90 @@ width: 40%;
     background-color: rgb(255, 255, 255);
     border-radius: 5px;
     padding:12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .category_change_input {
+
+         
+        max-width: auto;
+      
+        font-weight: 500;
+        line-height: 1.2;
+       
+        
+    
+        
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: none;
+        border-bottom: 1px solid #347427;
+        outline: none;
+    }
+
+    .actions-wrapper {
+        display: flex;
+        align-items: center;
+
+        
+
+        button {
+            border:none;
+            background-color: #b90606;
+            color:#fff;
+            padding:5px 10px;
+            border-radius: 5px;
+            transition: 0.5s;
+            &:hover {
+                background-color: #b90606;
+            }
+        }
+        i {
+            padding:5px;
+ 
+        }
+        .fa-check,.fa-xmark,.fa-pen-to-square{
+            margin-right: 10px;
+        }
+        .fa-check {
+            background-color: #439034;
+            color:#fff !important;
+            padding:10px !important;
+            transition: 0.5s;
+            border-radius: 5px;
+            &:hover {
+                background-color: #347427;
+                cursor: pointer;
+            } 
+        }
+        .fa-xmark {
+            background-color: #b90606;
+            color: #fff !important;;
+            padding:10px !important;
+            transition: 0.5s;
+            border-radius: 5px;
+            &:hover {
+                background-color: #9c0505;
+                cursor: pointer;
+            } 
+        }
+        .fa-pen-to-square {
+            background-color: #439034;
+            color:#fff !important;
+            padding:10px !important;
+            transition: 0.5s;
+            border-radius: 5px;
+           
+
+            &:hover {
+                background-color: #347427;
+                cursor: pointer;
+            } 
+        }
+            
+    }
 }
 .body-container {
     margin-top:100px;
@@ -496,7 +580,7 @@ width: 40%;
     .body-header-text {
         padding:8px;   
     }
-    .create-form {
+    .create-form, .edit-form {
         padding:20px !important ;  
         select{
             background-color: hsla(109, 47%, 38%, 0.041) !important;
@@ -557,7 +641,7 @@ width: 40%;
     }
     .create-item {
         padding:20px;
-        padding-left:0px;
+        padding-left:10px;
         margin-bottom:16px;
         a{  
             background-color: #439034;

@@ -69,6 +69,15 @@
                             
                             @endforeach
 
+                            <p class="c-bold mt-4">Toevoegen aan app categorie:</p> 
+                            <select name="category" id="categorySelect" enabled> 
+                                <option value=" ">Selecteer een app categorie:</option>
+                            @foreach($categories as $data)
+ 
+                                <option value="{{ $data->id }}">{{ $data->category_name }}</option>
+ 
+                            @endforeach
+                            </select><br/> 
                             <br/>
                             <div class="workspace_parameters_title"><div class="c-bold">Workspace parameters</div> </div> 
 

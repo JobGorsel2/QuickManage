@@ -2,10 +2,27 @@
 
 namespace App\Http\Controllers;
 use App\Models\AppCategorie;
+use App\Models\Page;
 use Illuminate\Http\Request;
 
 class AppGalleryController extends Controller
 {
+
+    //GKB_AppGallery_Page is de public page van de app gallery, deze is te bereiken zonder in te loggen. 
+    // Hier kunnen gebruikers een overzicht krijgen van de apps die er zijn en kunnen ze doorklikken naar de categorieën.
+    public function GKB_AppGallery_Page() 
+    {   
+        $app_categories = AppCategorie::all();
+
+        return view('pages.app_gallery.GKB_AppGallery_Page', [
+            'app_categories' => $app_categories
+        ]);
+    }
+
+
+
+
+
      public function index() 
     {   
         $app_categories = AppCategorie::all();
@@ -34,6 +51,66 @@ class AppGalleryController extends Controller
 
         return back()->with('success','Categorie aangemaakt!');
     }
+
+
+    public function show($unique) 
+    {   
+        $app_category = AppCategorie::where('id', $unique)->first();
+
+        $apps = Page::where('cat_id', $app_category->id)->get();
+
+     
+
+        return view('pages.app_gallery.app_category.show_cat', [
+            'app_category' => $app_category,
+            'apps' => $apps
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'category_name' => 'required|string|max:255',
+        ]);
+
+        $app_category = AppCategorie::findOrFail($id);
+        $app_category->category_name = $request->category_name;
+        $app_category->save();
+
+        return response()->json([
+            'category_name' => $app_category->category_name,
+        ]);
+    }
+
+
+     public function destroy($id)
+    {
+        // $id = Hash::make('1');
+        $pages = Page::where('cat_id',$id)->get();
+
+        foreach ($pages as $page) {
+            $page->cat_id = null;
+             
+            $page->save();
+        }
+         
+        
+        AppCategorie::where('id',$id)->delete();
+       
+        // $app_categories = AppCategorie::get();
+        // $var = 'TEST'; 
+        // dd($app_categories);
+        return redirect('/app-gallery')->with('success','Categorie verwijderd!');
+    }
+
+
+
+
+
+
+
+
+
    
      
 }

@@ -35,7 +35,7 @@
                     <div class="body-header-text">
                         <p>Vul de onderstaande veld(en) in:</p>
                     </div>
-                     <form action='/app-gallery/store' method="POST">
+                     <form action='/app-gallery/category/store' method="POST">
                         @csrf
                          
                         <input type="text" name='category_name' placeholder="Categorie naam..." required><br/><br/>
